@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <script src="/js/resource.js"></script> -->
+    <!-- <link rel="stylesheet" href="/css/table.css"> -->
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/asset.css}" />
+    <link rel="stylesheet" th:href="@{/css/importCommon.css}" />
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+
+    <div class="gd-right-content" id="contentDiv">
+        <div class="contentL" id="departmentBox">
+            <gd-tree :config='treeConfig' class="gd-tree-gray"></gd-tree>
+        </div>
+        <div class="contentR">
+            <div class="userlistBox">
+                <gd-toolbar :config="toolbarConfig"></gd-toolbar>
+
+                <div style="visibility: hidden;position: fixed;z-index: -1;">
+                    <div id="assetTypeTreeBox" class="assetTypeTreeBox">
+                        <gd-tree :config='assetTypeTreeConfig'></gd-tree>
+                    </div>
+                </div>
+
+                <div class="table-box">
+                    <gd-table :config="tableConfig"></gd-table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/html" id="allAssetBox">
+        <div id="addAssetBox">
+            <div class="assetForm" id="netAsset" style="display: none">
+                <form class="container" id="netForm">
+                    <div>设备信息</div>
+                    <div class="row asset-type-select">
+                        <label class="">类型</label>
+                        <gd-select name="type" v-model="asset_info.type" @change="typeChange(asset_info.type)">
+                            <gd-option :value="item.value" v-for="item,index in typeList">
+                                {{item.name}}
+                            </gd-option>
+                        </gd-select>
+                    </div>
+
+                    <!-- net样式 -->
+                    <div class="assetBox-list" id="netBox">
+                        <div class="assetBox-list-l">
+                            <div class="row">
+                                <label class="gd-label-required">设备名称</label>
+                                <input type="text" class="gd-input" name="name" gd-validate="required maxLength" gdv-maxlength="30" v-model="asset_info.name">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备IP</label>
+                                <input type="text" class="gd-input" name="ip" gd-validate="required ip" v-model="asset_info.ip">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备组</label>
+                                <gd-select name="groupId" gd-validate="required" v-model="asset_info.groupName">
+                                    <gd-tree :config='treeWindowConfig' class="gd-tree-gray"></gd-tree>
+                                </gd-select>
+                            </div>
+                        </div>
+                        <div class="assetBox-list-r">
+                            <div class="row">
+                                <label>编码</label>
+                                <gd-select placeholder="" name="encode" v-model="asset_info.encode">
+                                    <gd-option value="UTF-8">UTF-8</gd-option>
+                                    <gd-option value="GBK">GBK</gd-option>
+                                </gd-select>
+                            </div>
+                            <div class="row">
+                                <label>备注</label>
+                                <input type="text" class="gd-input" gd-validate="maxLength" gdv-maxlength="200" name="remark" v-model="asset_info.remark">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-title">账号信息</div>
+
+                    <div class="assetBox-list-oth">
+                        <div class="assetBox-list-l">
+                            <div class="row">
+                                <label class="gd-label-required">管理账号</label>
+                                <input type="text" class="gd-input" name="account" gd-validate="required" v-model="asset_info.account">
+                            </div>
+                        </div>
+                        <div class="assetBox-list-r">
+                            <div class="row">
+                                <label class="gd-label-required">密码</label>
+                                <input type="password" class="gd-input" name="password" gd-validate="required" v-model="asset_info.password" >
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="tableCon gd-table-wrapper container">
+                    <gd-toolbar :config="toolbarWinConfig"></gd-toolbar>
+                    <div class="gd-table-scroll-h">
+                        <div class="gd-table-head">
+                            <table>
+                                <tr>
+                                    <th width="10%" align="center"><label class="gd-checkbox"><input type="checkbox" v-model="asset_info.checkboxAccount" @change="accountChange"><i></i></label></th>
+                                    <th width="24%" align="left">账号</th>
+                                    <th width="22%" align="left">托管</th>
+                                    <th width="22%" align="left">操作</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="gd-table-scroll-v">
+                            <div class="gd-table-body" v-if="accountArr.length">
+                                <table id="accountCheckTable">
+                                    <tr v-for="item,index in accountArr">
+                                        <td width="10%"><label class="gd-checkbox"><input type="checkbox" :tab=index @change="accountEveryChange"><i></i></label></td>
+                                        <td width="24%">{{item.username}}</td>
+                                        <td width="22%"><span v-if="item.trusteeship == 0">否</span><span v-else>是</span></td>
+                                        <td width="22%"><button type="button" class="gd-btn-alone icon-delete" title="删除" @click="deleteAccount(index)"></button></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="gd-table-placeholder" v-else>
+                                <i class="gd-none-data"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="assetForm" id="windowsAsset" style="display: none">
+                <form class="container" id="windowsForm">
+                    <div>设备信息</div>
+                    <div class="row asset-type-select">
+                        <label class="">类型</label>
+                        <gd-select name="type" v-model="asset_info.type" @change="typeChange(asset_info.type)">
+                            <gd-option :value="item.value" v-for="item,index in typeList">
+                                {{item.name}}
+                            </gd-option>
+                        </gd-select>
+                    </div>
+
+                    <div class="assetBox-list" id="windowsBox">
+                        <div class="assetBox-list-l">
+                            <div class="row">
+                                <label class="gd-label-required">设备名称</label>
+                                <input type="text" class="gd-input" name="name" gd-validate="required maxLength" gdv-maxlength="30" v-model="asset_info.name">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备IP</label>
+                                <input type="text" class="gd-input" name="ip" gd-validate="required ip" v-model="asset_info.ip">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备组</label>
+                                <gd-select name="groupId" gd-validate="required" v-model="asset_info.groupName">
+                                    <gd-tree :config='treeWindowConfig' class="gd-tree-gray"></gd-tree>
+                                </gd-select>
+                            </div>
+                            <div class="row">
+                                <label>应用程序发布器</label>
+                                <label class="gd-switch">
+                                    <input type="checkbox" name="isPublish" v-model="asset_info.isPublish" @change="postOnOff">
+                                    <i></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="assetBox-list-r">
+                            <div class="row">
+                                <label>编码</label>
+                                <gd-select placeholder="" name="encode" v-model="asset_info.encode">
+                                    <gd-option value="UTF-8">UTF-8</gd-option>
+                                    <gd-option value="GBK">GBK</gd-option>
+                                </gd-select>
+                            </div>
+                            <div class="row">
+                                <label>备注</label>
+                                <input type="text" class="gd-input" gd-validate="maxLength" gdv-maxlength="200" name="remark" v-model="asset_info.remark">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-title">账号信息</div>
+
+                    <div class="assetBox-list-oth">
+                        <div class="assetBox-list-l">
+                            <div class="row">
+                                <label class="gd-label-required">管理账号</label>
+                                <input type="text" class="gd-input" name="account" gd-validate="required" v-model="asset_info.account" >
+                            </div>
+                        </div>
+                        <div class="assetBox-list-r">
+                            <div class="row">
+                                <label class="gd-label-required">密码</label>
+                                <input type="password" class="gd-input" name="password" gd-validate="required" v-model="asset_info.password" >
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="tableCon gd-table-wrapper container">
+                    <gd-toolbar :config="toolbarWinConfig"></gd-toolbar>
+                    <div class="gd-table-scroll-h">
+                        <div class="gd-table-head">
+                            <table>
+                                <tr>
+                                    <th width="10%" align="center"><label class="gd-checkbox"><input type="checkbox" v-model="asset_info.checkboxAccount" @change="accountChange"><i></i></label></th>
+                                    <th width="24%" align="left">账号</th>
+                                    <th width="22%" align="left">托管</th>
+                                    <th width="22%" align="left">操作</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="gd-table-scroll-v">
+                            <div class="gd-table-body"v-if="accountArr.length">
+                                <table id="accountCheckTable">
+                                    <tr v-for="item,index in accountArr">
+                                        <td width="10%"><label class="gd-checkbox"><input type="checkbox" :tab=index @change="accountEveryChange"><i></i></label></td>
+                                        <td width="24%">{{item.username}}</td>
+                                        <td width="22%"><span v-if="item.trusteeship == 0">否</span><span v-else>是</span></td>
+                                        <td width="22%"><button type="button" class="gd-btn-alone icon-delete" title="删除" @click="deleteAccount(index)"></button></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="gd-table-placeholder" v-else>
+                                <i class="gd-none-data"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="appPostRule" style="display: none">
+                    <div class="container">
+                        <div class="form-title">应用发布规则</div>
+                    </div>
+                    <div class="tableCon gd-table-wrapper ">
+                        <gd-toolbar :config="toolbarRuleConfig"></gd-toolbar>
+                        <div class="gd-table-scroll-h">
+                            <div class="gd-table-head">
+                                <table>
+                                    <tr>
+                                        <th width="20%" align="left">工具类型</th>
+                                        <th width="22%" align="left">名称</th>
+                                        <th width="28%" align="left">规则</th>
+                                        <th width="20%" align="left">操作</th>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="gd-table-scroll-v">
+                                <div class="gd-table-body">
+                                    <table>
+                                        <tr v-for="item,index in toolRuleArr">
+                                            <td width="20%">{{item.toolTypeName}}</td>
+                                            <td width="22%">{{item.name}}</td>
+                                            <td width="28%">{{item.rule}}</td>
+                                            <td width="20%"><button type="button" class="gd-btn-alone icon-edit" @click="editRule(index)"></button><button type="button" class="gd-btn-alone icon-delete" title="删除" @click="deleteRule(index)"></button></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="assetForm" id="dbAsset" style="display: none">
+                <form class="container" id="dbForm">
+                    <div>设备信息</div>
+                    <div class="row asset-type-select">
+                        <label>类型</label>
+                        <gd-select name="type" v-model="asset_info.type" @change="typeChange(asset_info.type)">
+                            <gd-option :value="item.value" v-for="item,index in typeList">
+                                {{item.name}}
+                            </gd-option>
+                        </gd-select>
+                    </div>
+
+                    <!-- db样式 -->
+                    <div class="assetBox-list" id="dbBox">
+                        <div class="assetBox-list-l">
+                            <div class="row">
+                                <label class="gd-label-required">设备名称</label>
+                                <input type="text" class="gd-input" name="name" gd-validate="required maxLength" gdv-maxlength="30" v-model="asset_info.name">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备IP</label>
+                                <input type="text" class="gd-input" name="ip" gd-validate="required ip" v-model="asset_info.ip">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备组</label>
+                                <gd-select name="groupId" gd-validate="required" v-model="asset_info.groupName">
+                                    <gd-tree :config='treeWindowConfig' class="gd-tree-gray"></gd-tree>
+                                </gd-select>
+                            </div>
+                        </div>
+                        <div class="assetBox-list-r">
+                            <div class="row">
+                                <label class="gd-label-required">应用程序发布器</label>
+                                <gd-select placeholder="" name="publish" gd-validate="required" v-model="csPostToolListVal" @change="csPostToolChange(csPostToolListVal)">
+                                    <gd-option :value="item.value" v-for="item,index in csPostToolList">{{item.name}}</gd-option>
+                                </gd-select>
+                                <i class="gd-btn-alone icon-help help-info"
+                                tooltip="<div style='line-height:20px;padding:5px 0'>该发布器为Windows类型设备，请先设置发布器<div>步聚：类型 > Windows > 开启应用程序发布器 > 创建应用程序发布规则</div></div>"></i>
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">连接工具</label>
+                                <gd-select placeholder="" name="operationTool" gd-validate="required" v-model="csPostToolRule">
+                                    <gd-option :value="item.value" v-for="item,index in operationToolList" >{{item.ruleName}}</gd-option>
+                                </gd-select>
+                                <i class="gd-btn-alone icon-help help-info" tooltip="该连接工具为应用发布规则，请先设置应用程序发布器"></i>
+                            </div>
+                            <div class="row">
+                                <label>备注</label>
+                                <input type="text" class="gd-input" name="remark" gd-validate="maxLength" gdv-maxlength="200" v-model="asset_info.remark">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-title">账号信息</div>
+                     <div class="assetBox-list-oth">
+                        <div class="assetBox-list-l">
+                            <div class="row">
+                                <label class="gd-label-required">数据库名</label>
+                                <input type="text" class="gd-input" name="dbName" gd-validate="required maxLength" gdv-maxlength="200" v-model="asset_info.dbName">
+                            </div>
+                        </div>
+                        <div class="assetBox-list-r">
+                            <div class="row">
+                                <label class="gd-label-required">端口</label>
+                                <input type="text" class="gd-input" name="port" gd-validate="required port" v-model="asset_info.port" >
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="tableCon gd-table-wrapper container">
+                    <gd-toolbar :config="toolbarWinConfig"></gd-toolbar>
+                    <div class="gd-table-scroll-h">
+                        <div class="gd-table-head">
+                            <table>
+                                <tr>
+                                    <th width="10%" align="center"><label class="gd-checkbox"><input type="checkbox" v-model="asset_info.checkboxAccount" @change="accountChange"><i></i></label></th>
+                                    <th width="45%" align="left">账号</th>
+                                    <th width="45%" align="left">操作</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="gd-table-scroll-v">
+                            <div class="gd-table-body" v-if="accountArr.length">
+                                <table id="accountCheckTable">
+                                    <tr v-for="item,index in accountArr">
+                                        <td width="10%"><label class="gd-checkbox"><input type="checkbox" :tab=index @change="accountEveryChange"><i></i></label></td>
+                                        <td width="24%">{{item.username}}</td>
+                                        <td width="22%"><button type="button" class="gd-btn-alone icon-delete"  title="删除" @click="deleteAccount(index)"></button></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="gd-table-placeholder" v-else>
+                                <i class="gd-none-data"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="assetForm" id="csAsset" style="display: none">
+                <form class="container" id="csForm">
+                    <div>设备信息</div>
+                    <div class="row asset-type-select">
+                        <label class="">类型</label>
+                        <gd-select name="type" v-model="asset_info.type" @change="typeChange(asset_info.type)">
+                            <gd-option :value="item.value" v-for="item,index in typeList">
+                                {{item.name}}
+                            </gd-option>
+                        </gd-select>
+                    </div>
+                    <div class="assetBox-list" id="csBox">
+                        <div class="assetBox-list-l">
+                            <div class="row">
+                                <label class="gd-label-required">设备名称</label>
+                                <input type="text" class="gd-input" name="name" gd-validate="required maxLength" gdv-maxlength="30" v-model="asset_info.name">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备IP</label>
+                                <input type="text" class="gd-input" name="ip" gd-validate="required ip"  v-model="asset_info.ip">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备组</label>
+                                <gd-select name="groupId" gd-validate="required" v-model="asset_info.groupName">
+                                    <gd-tree :config='treeWindowConfig' class="gd-tree-gray"></gd-tree>
+                                </gd-select>
+                            </div>
+                        </div>
+                        <div class="assetBox-list-r">
+                            <div class="row">
+                                <label class="gd-label-required">应用程序发布器</label>
+                                <gd-select placeholder="" name="publish" gd-validate="required" v-model="csPostToolListVal" @change="csPostToolChange(csPostToolListVal)">
+                                    <gd-option :value="item.value" v-for="item,index in csPostToolList">{{item.name}}</gd-option>
+                                </gd-select>
+                                <i class="gd-btn-alone icon-help help-info"
+                                tooltip="<div style='line-height:20px;padding:5px 0'>该发布器为Windows类型设备，请先设置发布器<div>步聚：类型 > Windows > 开启应用程序发布器 > 创建应用程序发布规则</div></div>"></i>
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">连接工具</label>
+                                <gd-select placeholder="" name="operationTool" gd-validate="required" v-model="csPostToolRule">
+                                    <gd-option :value="item.value" v-for="item,index in operationToolList" >{{item.ruleName}}</gd-option>
+                                </gd-select>
+                                <i class="gd-btn-alone icon-help help-info" tooltip="该连接工具为应用发布规则，请先设置应用程序发布器"></i>
+                            </div>
+                            <div class="row">
+                                <label>备注</label>
+                                <input type="text" class="gd-input" gd-validate="maxLength" gdv-maxlength="200" name="remark" v-model="asset_info.remark">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-title">账号信息</div>
+                </form>
+                <div class="tableCon gd-table-wrapper container">
+                    <gd-toolbar :config="toolbarWinConfig"></gd-toolbar>
+                    <div class="gd-table-scroll-h">
+                        <div class="gd-table-head">
+                            <table>
+                                <tr>
+                                    <th width="10%" align="center"><label class="gd-checkbox"><input type="checkbox" v-model="asset_info.checkboxAccount" @change="accountChange"><i></i></label></th>
+                                    <th width="45%" align="left">账号</th>
+                                    <th width="45%" align="left">操作</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="gd-table-scroll-v">
+                            <div class="gd-table-body" v-if="accountArr.length">
+                                <table id="accountCheckTable">
+                                    <tr v-for="item,index in accountArr">
+                                        <td width="10%"><label class="gd-checkbox"><input type="checkbox" :tab=index @change="accountEveryChange"><i></i></label></td>
+                                        <td width="24%">{{item.username}}</td>
+                                        <td width="22%"><button type="button" class="gd-btn-alone icon-delete" title="删除" @click="deleteAccount(index)"></button></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="gd-table-placeholder" v-else>
+                                <i class="gd-none-data"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="assetForm" id="bsAsset" style="display: none">
+                <form class="container" id="csForm">
+                    <div>设备信息</div>
+                    <div class="row asset-type-select">
+                        <label class="">类型</label>
+                        <gd-select name="type" v-model="asset_info.type" @change="typeChange(asset_info.type)">
+                            <gd-option :value="item.value" v-for="item,index in typeList">
+                                {{item.name}}
+                            </gd-option>
+                        </gd-select>
+                    </div>
+                    <div class="assetBox-list" id="csBox">
+                        <div class="assetBox-list-l">
+                            <div class="row">
+                                <label class="gd-label-required">设备名称</label>
+                                <input type="text" class="gd-input" name="name" gd-validate="required maxLength" gdv-maxlength="30" v-model="asset_info.name">
+                            </div>
+                            <div class="row">
+                                <label>设备IP</label>
+                                <input type="text" class="gd-input" name="ip" gd-validate="ip"  v-model="asset_info.ip">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备组</label>
+                                <gd-select name="groupId" gd-validate="required" v-model="asset_info.groupName">
+                                    <gd-tree :config='treeWindowConfig' class="gd-tree-gray"></gd-tree>
+                                </gd-select>
+                            </div>
+                        </div>
+                        <div class="assetBox-list-r">
+                            <div class="row">
+                                <label class="gd-label-required">应用程序发布器</label>
+                                <gd-select placeholder="" name="publish" gd-validate="required" v-model="csPostToolListVal" @change="csPostToolChange(csPostToolListVal)">
+                                    <gd-option :value="item.value" v-for="item,index in csPostToolList">{{item.name}}</gd-option>
+                                </gd-select>
+                                <i class="gd-btn-alone icon-help help-info"
+                                tooltip="<div style='line-height:20px;padding:5px 0'>该发布器为Windows类型设备，请先设置发布器<div>步聚：类型 > Windows > 开启应用程序发布器 > 创建应用程序发布规则</div></div>"></i>
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">连接工具</label>
+                                <gd-select placeholder="" name="operationTool" gd-validate="required" v-model="csPostToolRule">
+                                    <gd-option :value="item.value" v-for="item,index in operationToolList" >{{item.ruleName}}</gd-option>
+                                </gd-select>
+                                <i class="gd-btn-alone icon-help help-info" tooltip="该连接工具为应用发布规则，请先设置应用程序发布器"></i>
+                            </div>
+                            <div class="row">
+                                <label>备注</label>
+                                <input type="text" class="gd-input" gd-validate="maxLength" gdv-maxlength="200" name="remark" v-model="asset_info.remark">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-title">账号信息</div>
+                </form>
+                <div class="tableCon gd-table-wrapper container">
+                    <gd-toolbar :config="toolbarWinConfig"></gd-toolbar>
+                    <div class="gd-table-scroll-h">
+                        <div class="gd-table-head">
+                            <table>
+                                <tr>
+                                    <th width="10%" align="center"><label class="gd-checkbox"><input type="checkbox" v-model="asset_info.checkboxAccount" @change="accountChange"><i></i></label></th>
+                                    <th width="45%" align="left">账号</th>
+                                    <th width="45%" align="left">操作</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="gd-table-scroll-v">
+                            <div class="gd-table-body" v-if="accountArr.length">
+                                <table id="accountCheckTable">
+                                    <tr v-for="item,index in accountArr">
+                                        <td width="10%"><label class="gd-checkbox"><input type="checkbox" :tab=index @change="accountEveryChange"><i></i></label></td>
+                                        <td width="24%">{{item.username}}</td>
+                                        <td width="22%"><button type="button" class="gd-btn-alone icon-delete" title="删除" @click="deleteAccount(index)"></button></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="gd-table-placeholder" v-else>
+                                <i class="gd-none-data"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <!-- <div class="assetForm" id="bsAsset" style="display: none">
+                <form class="container" id="bsForm">
+                    <div>设备信息</div>
+                    <div class="row asset-type-select">
+                        <label class="">类型</label>
+                        <gd-select name="type" v-model="asset_info.type" @change="typeChange(asset_info.type)">
+                            <gd-option :value="item.value" v-for="item,index in typeList">
+                                {{item.name}}
+                            </gd-option>
+                        </gd-select>
+                    </div>
+
+                    <div class="assetBox-list" id="bsBox">
+                        <div class="assetBox-list-l">
+                            <div class="row">
+                                <label class="gd-label-required">设备名称</label>
+                                <input type="text" class="gd-input" name="name" gd-validate="required maxLength" gdv-maxlength="30" v-model="asset_info.name">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备IP</label>
+                                <input type="text" class="gd-input" name="assetIp" gd-validate="required ip" v-model="asset_info.ip">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">设备组</label>
+                                <gd-select name="groupId" v-model="asset_info.groupName">
+                                    <gd-tree :config='treeWindowConfig' class="gd-tree-gray"></gd-tree>
+                                </gd-select>
+                            </div>
+                        </div>
+                        <div class="assetBox-list-r">
+                            <div class="row">
+                                <label>登录URL</label>
+                                <input type="text" class="gd-input" name="username" gd-validate="required maxLength" gdv-maxlength="200">
+                            </div>
+                            <div class="row">
+                                <label class="gd-label-required">备注</label>
+                                <input type="text" class="gd-input" gd-validate="maxLength" gdv-maxlength="200" name="remark" v-model="asset_info.remark">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-title">账号信息</div>
+                </form>
+                <div class="tableCon gd-table-wrapper container">
+                    <gd-toolbar :config="toolbarWinConfig"></gd-toolbar>
+                    <div class="gd-table-scroll-h">
+                        <div class="gd-table-head">
+                            <table>
+                                <tr>
+                                    <th width="10%" align="center"><label class="gd-checkbox"><input type="checkbox" v-model="asset_info.checkboxAccount" @change="accountChange"><i></i></label></th>
+                                    <th width="24%" align="left">账号</th>
+                                    <th width="22%" align="left">操作</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="gd-table-scroll-v">
+                            <div class="gd-table-body" v-if="accountArr.length">
+                                <table id="accountCheckTable">
+                                    <tr v-for="item,index in accountArr">
+                                        <td width="10%"><label class="gd-checkbox"><input type="checkbox" :tab=index @change="accountEveryChange"><i></i></label></td>
+                                        <td width="24%">{{item.username}}</td>
+                                        <td width="22%"><button type="button" class="gd-btn-alone icon-delete" title="删除"
+                                             @click="deleteAccount(index)"></button></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="gd-table-placeholder" v-else>
+                                <i class="gd-none-data"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </script>
+
+    <!-- 新建规则 -->
+    <script type="text/html" id="addRuleBox">
+        <div class="addRuleBox" id="addRule">
+            <form id="addRuleForm">
+                <div class="assetBox-list container">
+                    <div class="assetBox-list-l">
+                        <div class="row">
+                            <label class="gd-label-required">工具类型</label>
+                            <gd-select name="type" v-model="rule_info.toolType">
+                                <gd-option :value="item.value" v-for="item,index in toolTypeList">
+                                    {{item.name}}
+                                </gd-option>
+                            </gd-select>
+                        </div>
+                    </div>
+                    <div class="assetBox-list-r">
+                        <div class="row">
+                            <label class="gd-label-required">名称</label>
+                            <input type="text" class="gd-input" v-model="rule_info.toolName" gd-validate="required maxLength" gdv-maxlength="200">
+                        </div>
+                    </div>
+                </div>
+                <div class="tableCon gd-table-wrapper container">
+                    <div class="property-box">
+                        <div class="row">
+                            <label>属性名</label>
+                            <gd-select name="type" v-model="rule_info.propertyName">
+                                <gd-option :value="item.name" v-for="item,index in propertyNameList">
+                                    {{item.name}}
+                                </gd-option>
+                            </gd-select>
+                        </div>
+                        <div class="row">
+                            <label>属性值</label>
+                            <input type="text" class="gd-input" name="propertyVal" v-model="rule_info.propertyVal">
+                        </div>
+                        <div class="addProperty">
+                            <i title="添加" class="gd-btn-icon icon-add" @click="addProperty"></i>
+                        </div>
+                    </div>
+                    <div class="gd-table-scroll-h">
+                        <div class="gd-table-head">
+                            <table>
+                                <tr>
+                                    <th width="24%" align="left">属性名</th>
+                                    <th width="22%" align="left">属性值</th>
+                                    <th width="22%" align="left">操作</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="gd-table-scroll-v">
+                            <div class="gd-table-body">
+                                <table>
+                                    <tr v-for="item,index in propertyArr">
+                                        <td width="24%">{{item.name}}</td>
+                                        <td width="22%">{{item.content}}</td>
+                                        <td width="22%">
+                                            <button type="button" class="gd-btn-alone icon-move-up" @click="upProperty(index)"></button>
+                                            <button type="button" class="gd-btn-alone icon-move-down" @click="downProperty(index)"></button>
+                                            <button type="button" class="gd-btn-alone icon-delete" title="删除" @click="deleteProperty(index)"></button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row rule-con">
+                        <label class="gd-label-required">规则</label>
+                        <input type="text" class="gd-input" v-model="rule_info.ruleCon" gd-validate="required">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <!-- 添加账号 -->
+    <script type="text/html" id="addAccountBox">
+        <div class="addAccountBox" id="addAccount">
+            <form id="accountForm" class="container">
+                <div class="row">
+                    <label class="gd-label-required">账号</label>
+                    <input type="text" class="gd-input" name="username" gd-validate="required maxLength" gdv-maxlength="30">
+                </div>
+                <div class="row">
+                    <label class="gd-label-required">密码</label>
+                    <input type="password" class="gd-input" name="password" gd-validate="required">
+                </div>
+                <div class="row">
+                    <label class="gd-label-required">托管</label>
+                    <div class="trusteeship">
+                        <label class="gd-radio">
+                            <input type="radio" value="1" name="trusteeship" checked="">
+                            <i></i>
+                            是
+                        </label>
+                        <label class="gd-radio">
+                            <input type="radio" value="0" name="trusteeship">
+                            <i></i>
+                            否
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <!-- 添加账号 -->
+    <script type="text/html" id="addAccountBox_other">
+        <div class="addAccountBox" id="addAccount">
+            <form id="accountForm" class="container">
+                <div class="row">
+                    <label class="gd-label-required">账号</label>
+                    <input type="text" class="gd-input" name="username" gd-validate="required maxLength" gdv-maxlength="30">
+                </div>
+                <div class="row">
+                    <label class="gd-label-required">密码</label>
+                    <input type="password" class="gd-input" name="password" gd-validate="required maxLength" gdv-maxlength="30">
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <!-- 导入 -->
+    <script type="text/html" id="importUserBox">
+        <div id="importUser">
+            <form id="uploadForm" enctype="multipart/form-data" method="post" class="clearfix">
+                <div class="mode-choose">
+                    <span style="top:-34px;">方式</span>
+                    <div class="label-readio">
+                        <label class="gd-radio" v-for="(tab,index) in importMode">
+                            <input type="radio" value="Radio1" name="radio" :checked="index == 0" @change="radioChange(index)">
+                            <i></i>
+                            {{tab}}
+                        </label>
+                    </div>
+                    <span class="help-title"><i class="icon-help"></i> 上传自定义设备列表，将覆盖系统中已有的设备信息</span>
+                </div>
+                <div>
+                    <span>模板</span>
+                    <button type="button" class="gd-btn-cancel btn-export-down" @click="downModel">下载</button>
+                </div>
+                <div>
+                    <span style="top:-10px;">上传文件</span>
+                    <div class="upload-file">
+                        <div class="import-input">
+                            <input type="text" class="gd-input" id="incCopyFile" readonly="readonly">
+                            <input type="hidden" name="MAX_FILE_SIZE" value="10000000000">
+                            <input id="incTrueFile" type="file" name="file" accept="" class="import-file">
+                            <span class="icon-file btn-file"></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/assetList.js}"></script>
+
+</body>
+
+</html>

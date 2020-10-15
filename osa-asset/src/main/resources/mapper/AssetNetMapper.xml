@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.asset.mapper.AssetNetMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.asset.entity.AssetNet">
+        <result column="asset_id" property="assetId" />
+        <result column="protocol_type" property="protocolType" />
+        <result column="port" property="port" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        asset_id, protocol_type, port
+    </sql>
+
+</mapper>

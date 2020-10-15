@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/approval.css}" />
+
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+
+    <div class="gd-right-content" id="contentDiv">
+        <div class="container containerWrapper">
+            <gd-tab style="height:100%;">
+                <gd-tab-item label="待审批">
+                    <div class="table-box">
+                        <gd-table :config="tableConfig"></gd-table>
+                    </div>
+                </gd-tab-item>
+                <gd-tab-item label="已审批">
+                    <div class="table-box">
+                        <gd-table :config="approvedTableConfig"></gd-table>
+                    </div>
+                </gd-tab-item>
+            </gd-tab>
+        </div>
+    </div>
+
+    <script type="text/html" id="everyApprovalDetailBox">
+        <div class="" id="everyApprovalDetail" style="height:100%">
+            <div class="everyApprovedDetailCon">
+                <form>
+                    <span class="fl">申请人：</span><span class="">{{approvalPeople}}</span>
+                    <span class="fl margin-left-50">备注：</span><input type="text" value="" gd-validate="maxLength" gdv-maxlength="200" class="gd-input" v-model="approveRemark">
+                </form>
+            </div>
+            <gd-table :config="everyApprovalTableConfig" style="height:calc(100% - 60px)"></gd-table>
+        </div>
+    </script>
+
+    <script type="text/html" id="everyApprovedDetailBox">
+        <div class="" id="everyApprovedDetail" style="height:482px">
+            <div class="everyToolbarBox">
+                <div class="everyApprovedDetailCon">
+                        <span class="fl">申请人：</span><span class="">{{approvalPeople}}</span>
+                        <span class="fl margin-left-50">备注：</span>{{approveRemark}}
+                    </div>
+                <gd-toolbar :config="searchConfig"></gd-toolbar>
+            </div>
+            <gd-table :config="everyApprovedTableConfig" style="height:488px"></gd-table>
+        </div>
+    </script>
+
+    <script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/encrypt.js}"></script>
+    <script th:src="@{/js/sha256.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/approvalGranted.js}"></script>
+
+</body>
+
+</html>

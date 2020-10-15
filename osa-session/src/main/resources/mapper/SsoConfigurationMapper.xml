@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.session.mapper.SsoConfigurationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.session.entity.SsoConfiguration">
+        <id column="id" property="id" />
+        <result column="user_guid" property="userGuid" />
+        <result column="asset_id" property="assetId" />
+        <result column="asset_type" property="assetType" />
+        <result column="account_id" property="accountId" />
+        <result column="configuration" property="configuration" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_guid, asset_id, asset_type, account_id, configuration
+    </sql>
+
+</mapper>

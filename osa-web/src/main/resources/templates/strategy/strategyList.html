@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <script src="/js/resource.js"></script> -->
+    <!-- <link rel="stylesheet" href="/css/table.css"> -->
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/js/plugins/colpick/colpick.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/strategy.css}" />
+    <!-- <link rel="stylesheet" th:href="@{/css/gd_common.css}" /> -->
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+
+    <div class="gd-right-content" id="contentDiv">
+        <div class="strategylistBox">
+            <gd-toolbar :config="toolbarConfig"></gd-toolbar>
+            <div class="table-box">
+                <gd-table :config="tableConfig"></gd-table>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/html" id="addStrategyBox">
+        <div class="container" id="addStrategy" v-cloak>
+            <form id="addStrategyForm">
+                <gd-tab scroll style="height:440px">
+                    <gd-tab-item label="基本信息">
+                        <div class="tabcon-title">基本信息</div>
+                        <div class="row">
+                            <label class="gd-label-required">策略名称</label>
+                            <input type="text" class="gd-input strategy-name-input" v-model="name" name="name" gd-validate="required maxLength" gdv-maxlength="30">
+                        </div>
+                    </gd-tab-item>
+
+                    <gd-tab-item label="命令控制">
+                        <div class="tabcon-title">命令控制</div>
+                        <!-- 会话命令布局 -->
+                        <div class="command-con">
+                            <div class="command-left">
+                                <label class="">阻断会话命令</label>
+                                <textarea name="strategyCommandBlock" v-model="commandBlock"></textarea>
+                            </div>
+                            <div class="command-middle">
+                                <label>禁止执行命令</label>
+                                <textarea name="strategyCommandProhibit" v-model="commandProhibit"></textarea>
+                            </div>
+                        </div>
+                    </gd-tab-item>
+                    <gd-tab-item label="登录时间">
+                        <div class="tabcon-title">登录时间</div>
+                        <div class="logintimeCon">
+                            <div class="logintimeInput" @click="loginTimeUpDown">
+                                <span class="logintimeSpan"></span>
+                                <input type="text" name="" readonly="readonly" class="gd-input calendar-input">
+                                <span class="icon-date"></span>
+                            </div>
+                            <div class="logintimeDown" style="visibility: hidden;">
+                                <ul class="timerulerUl">
+                                    <li tab="1" class="active">周一</li><li tab="2">周二</li><li>周三</li><li>周四</li><li>周五</li><li>周六</li><li>周日</li>
+                                </ul>
+                                <div class="timeRulerConBox">
+                                    <div class="timerulerCon" style="display:block;">
+                                        <gd-timeruler :config="timeRangeRulerConfig1"></gd-timeruler>
+                                    </div>
+                                    <div class="timerulerCon">
+                                        <gd-timeruler :config="timeRangeRulerConfig2"></gd-timeruler>
+                                    </div>
+                                    <div class="timerulerCon">
+                                        <gd-timeruler :config="timeRangeRulerConfig3"></gd-timeruler>
+                                    </div>
+                                    <div class="timerulerCon">
+                                        <gd-timeruler :config="timeRangeRulerConfig4"></gd-timeruler>
+                                    </div>
+                                    <div class="timerulerCon">
+                                        <gd-timeruler :config="timeRangeRulerConfig5"></gd-timeruler>
+                                    </div>
+                                    <div class="timerulerCon">
+                                        <gd-timeruler :config="timeRangeRulerConfig6"></gd-timeruler>
+                                    </div>
+                                    <div class="timerulerCon">
+                                        <gd-timeruler :config="timeRangeRulerConfig7"></gd-timeruler>
+                                    </div>
+                                </div>
+                                <div class="timeruler-btn">
+                                   <button type="button" class="gd-btn" @click="confirmTime">确定</button>&nbsp;&nbsp;<button type="button" class="gd-btn-cancel" @click="cancelTime">取消</button>
+                                </div>
+                            </div>
+                        </div>
+                    </gd-tab-item>
+                    <gd-tab-item label="水印设置">
+                        <div class="tabcon-title">水印设置<label class="gd-switch watermark-switch"><input type="checkbox" v-model="screenWatermark.enable"><i></i></label></div>
+                        <div class="gd-margin-left-xl">
+                            <div class="gd-margin-bottom-xl">组合</div>
+                            <div class="gd-margin-left-xl watermark-group">
+                                <div>
+                                    <label class="gd-checkbox"><input type="checkbox" :disabled="screenWatermark.enable==0" v-model="screenWatermark.content.depname"><i></i>部门名称</label>
+                                    <label class="gd-checkbox"><input type="checkbox" :disabled="screenWatermark.enable==0" v-model="screenWatermark.content.username"><i></i>真实名称</label>
+                                    <label class="gd-checkbox"><input type="checkbox" :disabled="screenWatermark.enable==0" v-model="screenWatermark.content.ip"><i></i>IP地址</label>
+                                    <label class="gd-checkbox"><input type="checkbox" :disabled="screenWatermark.enable==0" v-model="screenWatermark.content.macaddress"><i></i>MAC地址</label>
+                                    <label class="gd-checkbox"><input type="checkbox" :disabled="screenWatermark.enable==0" v-model="screenWatermark.content.computername"><i></i>计算机名称</label>
+                                    <label class="gd-checkbox"><input type="checkbox" :disabled="screenWatermark.enable==0" v-model="screenWatermark.content.time"><i></i>终端时间</label>
+                                </div>
+                               <div class="gd-margin-top-md">
+                                   <label class="gd-checkbox"><input type="checkbox" v-model="screenWatermark.content.manual" :disabled="screenWatermark.enable==0"><i></i>自定义</label>
+                                   <input type="text" class="gd-input" :disabled="screenWatermark.content.manual!=true ||screenWatermark.enable==0" v-model="screenWatermark.content.manualtext">
+                               </div>
+                            </div>
+                        </div>
+                        <div class="gd-margin-left-xl">
+                            <div class="gd-margin-v-xl">位置</div>
+                            <div class="gd-margin-left-xl watermark-position">
+                                <label class="gd-radio"><input type="radio" value="0" name="mode":disabled="screenWatermark.enable==0" v-model="waterMarkPosition"><i></i>平铺</label>
+                                <label class="gd-radio gd-margin-left-xl"><input type="radio" value="1" name="mode":disabled="screenWatermark.enable==0" v-model="waterMarkPosition"><i></i>自定义</label>
+                                <label class="gd-checkbox"><input type="checkbox" :disabled="waterMarkPosition != 1 ||screenWatermark.enable==0" v-model="waterMarkPositionArr" value="1"><i></i>左上角</label>
+                                <label class="gd-checkbox"><input type="checkbox" :disabled="waterMarkPosition != 1 ||screenWatermark.enable==0" v-model="waterMarkPositionArr" value="2"><i></i>右上角</label>
+                                <label class="gd-checkbox"><input type="checkbox" :disabled="waterMarkPosition != 1 ||screenWatermark.enable==0" v-model="waterMarkPositionArr" value="8"><i></i>左下角</label>
+                                <label class="gd-checkbox"><input type="checkbox" :disabled="waterMarkPosition != 1 ||screenWatermark.enable==0" v-model="waterMarkPositionArr" value="16"><i></i>右下角</label>
+                                <label class="gd-checkbox"><input type="checkbox" :disabled="waterMarkPosition != 1 ||screenWatermark.enable==0" v-model="waterMarkPositionArr" value="4"><i></i>居中</label>
+                            </div>
+                        </div>
+                        <div class="gd-margin-left-xl">
+                            <div class="gd-margin-v-xl">样式</div>
+                            <div class="gd-margin-left-xl">
+                                <div class="gd-margin-left-xl watermark-style">
+                                    <div class="watermark-select">
+                                        <label id="watermarkPickColorx">颜色</label>
+                                        <div id="watermarkColorDisplay" v-if="waterMarkColor" :style="{'background-color':'#'+waterMarkColor,'z-index':screenWatermark.enable==0?10:0}"></div>
+                                        <gd-select class="watermark-colorpick" v-model="waterMarkColor" ref="waterMarkColorSelect" :disabled="screenWatermark.enable==0">
+                                            <span style="display:none"></span>
+                                            <gd-option value="ff0000"><span class="watermark-coloritem" style="background:#ff0000"></span></gd-option>
+                                            <gd-option value="00ff00"><span class="watermark-coloritem" style="background:#00ff00"></span></gd-option>
+                                            <gd-option value="00ffff"><span class="watermark-coloritem" style="background:#00ffff"></span></gd-option>
+                                            <gd-option value="ffffff"><span class="watermark-coloritem" style="background:#ffffff"></span></gd-option>
+                                            <gd-option value="custom" class="gd-option-custom" id="watermarkPickColor"><span class="watermark-coloritem" style="background:linear-gradient(to right, red, orange, yellow, green, blue);"></span></gd-option>
+                                        </gd-select>
+                                    </div>
+                                    <div class="watermark-select">
+                                        <label>透明度</label>
+                                        <gd-select v-model="screenWatermark.content.opacity" :disabled="screenWatermark.enable==0">
+                                            <gd-option value="255">0%</gd-option>
+                                            <gd-option value="225">10%</gd-option>
+                                            <gd-option value="200">20%</gd-option>
+                                            <gd-option value="175">30%</gd-option>
+                                            <gd-option value="150">40%</gd-option>
+                                            <gd-option value="125">50%</gd-option>
+                                            <gd-option value="100">60%</gd-option>
+                                            <gd-option value="75">70%</gd-option>
+                                            <gd-option value="50">80%</gd-option>
+                                            <gd-option value="25">90%</gd-option>
+                                        </gd-select>
+                                    </div>
+                                    <div class="watermark-select">
+                                        <label>方向</label>
+                                        <gd-select v-model="screenWatermark.content.direction" :disabled="screenWatermark.enable==0">
+                                            <gd-option value="0">左斜</gd-option>
+                                            <gd-option value="1">右斜</gd-option>
+                                            <gd-option value="2">横向</gd-option>
+                                            <gd-option value="3">纵向</gd-option>
+                                        </gd-select>
+                                    </div>
+                                    <div class="watermark-select">
+                                        <label>字体大小</label>
+                                        <gd-select v-model="screenWatermark.content.fontsize" :disabled="screenWatermark.enable==0">
+                                            <gd-option value="14">14</gd-option>
+                                            <gd-option value="16">16</gd-option>
+                                            <gd-option value="18">18</gd-option>
+                                            <gd-option value="20">20</gd-option>
+                                            <gd-option value="22">22</gd-option>
+                                            <gd-option value="24">24</gd-option>
+                                            <gd-option value="26">26</gd-option>
+                                            <gd-option value="28">28</gd-option>
+                                            <gd-option value="30">30</gd-option>
+                                        </gd-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </gd-tab-item>
+                    <gd-tab-item label="行为审计">
+                        <div class="tabcon-title">行为审计</div>
+                        <div class="gd-margin-left-xl">
+                            <div class="gd-margin-bottom-xs">文件操作<label class="gd-switch audit-switch"><input type="checkbox" v-model="fileMon.enable"><i></i></label></div>
+                            <div class="audit-filebox">
+                                <div class="audit-filepanel">
+                                    <div class="audit-filepanel-title">未选文件类型</div>
+                                    <div class="audit-filetree">
+                                        <gd-tree :config='fileTypeTreeConfig'></gd-tree>
+                                    </div>
+                                </div>
+                                <div class="audit-filepanel gd-margin-left-xl">
+                                    <div class="audit-filepanel-title">已选文件类型</div>
+                                    <div class="audit-filetree">
+                                        <div class="audit-already-file" v-for="item in fileTypeList"><i class="icon-folder"></i>{{item.name}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="gd-margin-top-xs">仅审计资源管理器<label class="gd-switch audit-switch"><input type="checkbox" v-model="fileMon.content.resourceManager"><i></i></label></div>
+                        </div>
+                    </gd-tab-item>
+
+                </gd-tab>
+            </form>
+        </div>
+    </script>
+
+    <script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/plugins/colpick/colpick.js}"></script>
+    <script th:src="@{/js/strategy.js}"></script>
+
+</body>
+
+</html>

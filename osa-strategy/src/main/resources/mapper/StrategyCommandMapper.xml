@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.strategy.mapper.StrategyCommandMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.strategy.entity.StrategyCommand">
+        <id column="id" property="id" />
+        <result column="type" property="type" />
+        <result column="command_content" property="commandContent" />
+        <result column="strategy_id" property="strategyId" />
+        <result column="create_time" property="createTime" />
+        <result column="create_by" property="createBy" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, type, command_content, strategy_id, create_time, create_by
+    </sql>
+
+    <!-- 通过策略guid获取 命令控制 -->
+    <select id="findStrategyCommandsByStrategyGuid" parameterType="String" resultType="com.goldencis.osa.strategy.entity.StrategyCommand">
+        select <include refid="Base_Column_List"></include>
+        from t_strategy_command
+        where strategy_id = #{value}
+    </select>
+
+    <!-- 根据策略guid删除控制命令 -->
+    <delete id="deleteStrategyCommandByStrategyGuid" parameterType="String">
+         delete from t_strategy_command
+         where  strategy_id = #{value}
+    </delete>
+
+    <!-- 通过策略guid获取 命令控制 -->
+    <select id="findStrategyCommandsByStrategyGuidType" parameterType="map" resultType="com.goldencis.osa.strategy.entity.StrategyCommand">
+        SELECT <include refid="Base_Column_List"></include>
+        FROM t_strategy_command
+        <where>
+            <if test="strategyId !=null">
+                AND strategy_id = #{strategyId}
+            </if>
+            <if test="commandType != null">
+                AND type = #{commandType}
+            </if>
+        </where>
+    </select>
+</mapper>

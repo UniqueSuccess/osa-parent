@@ -1,0 +1,380 @@
+.user_infor_form_div {
+    margin-bottom: 12px;
+    height: 32px;
+}
+
+.user_infor_form .form_div {
+    margin-bottom: 12px;
+}
+
+.user_infor_form div label {
+    width: 110px;
+    text-align: right;
+    display: block;
+    float: left;
+    line-height: 30px;
+    padding-right: 10px;
+}
+
+.user_infor_form div input {
+    width: 380px;
+}
+
+.table-box {
+    height: calc(100% - 56px);
+}
+
+.gd-toolbar {
+    padding: 0 !important;
+}
+
+.strategylistBox {
+    height: 100%;
+    padding: 0 20px;
+}
+
+.gd-switch {
+    padding: 6px 0;
+}
+
+.gd-select {
+    width: 280px;
+    height: 32px;
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    font-size: 14px;
+}
+
+.gd-select .gd-select-input {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+.container .row input {
+    width: 280px !important;
+}
+
+#addStrategy .gd-tab-scroll {
+    margin-top: 0px;
+    border: none;
+}
+
+.tabcon-title {
+    font-size: 15px;
+    padding: 20px 0;
+}
+
+#addStrategy .gd-tab-content {
+    padding: 5px 20px;
+}
+
+#addStrategy .tabcon-margin-top20 {
+    margin-top: 20px;
+}
+
+#addStrategy .gd-tab-item {
+    clear: both;
+}
+
+.tabcon-title-sub {
+    margin: 20px 20px;
+}
+
+.sub-con-protocal {
+    margin-left: 40px;
+}
+
+.sub-con-protocal label {
+    margin-left: 20px;
+}
+
+.command-con {
+    overflow: hidden;
+    clear: both;
+}
+
+.command-con label {
+    display: block;
+    background: #eee;
+    height: 32px;
+    line-height: 32px;
+    padding-left: 10px;
+}
+
+.command-con textarea {
+    width: 220px;
+    height: 180px;
+    border: 1px solid #e1e1e1;
+    padding: 0;
+    margin: 0;
+}
+
+.command-left {
+    margin-left: 20px;
+    float: left;
+    width: 222px;
+}
+
+.command-middle {
+    float: left;
+    width: 222px;
+    margin: 0 15px;
+}
+
+.command-right {
+    float: left;
+    width: 222px;
+}
+
+#addStrategy.container {
+    margin: 20px 0;
+}
+
+#addStrategy .strategy-name-input {
+    width: 360px !important;
+}
+
+.logintimeList {
+    margin: 0 0 0 60px;
+    width: 648px;
+    border-width: 1px 0 0 1px;
+    border-color: #ebebeb;
+    border-style: solid;
+    overflow: hidden;
+}
+
+.logintimeList li {
+    cursor: pointer;
+    float: left;
+    width: 26px;
+    height: 26px;
+    background-color: #f5f5f5;
+    border-width: 0 1px 1px 0;
+    border-color: #ebebeb;
+    border-style: solid;
+}
+
+.logintimeDate {
+    margin-left: 61px;
+    overflow: hidden;
+    width: 648px;
+}
+
+.logintimeDate i {
+    float: left;
+    display: inline-block;
+    font-style: normal;
+    color: #666;
+    font-size: 12px;
+    width: 27px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+}
+
+.logintimeContent {
+    position: relative;
+}
+
+.logintimeWeeks {
+    position: absolute;
+    left: 15px;
+    top: 28px;
+}
+
+.logintimeWeeks li {
+    margin: 0;
+    padding: 0;
+    line-height: 27px;
+    height: 27px;
+    color: #666;
+}
+
+.logintimeList li.dateActive {
+    background: #6785cf;
+}
+
+.logintimeCon {
+    position: relative;
+    margin-left: 20px;
+    width: 500px;
+}
+
+.calendar-input {
+    width: 500px;
+    margin-right: 10px;
+}
+
+.logintimeCon .icon-date {
+    position: absolute;
+    right: 10px;
+    top: 7px;
+    color: #aaa;
+}
+
+.logintimeDown {
+    position: absolute;
+    width: 610px;
+    height: 215px;
+    background: #fff;
+    left: 0;
+    top: 33px;
+    box-shadow: 1px 1px 10px #ddd;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.logintimeSpan {
+    display: inline-block;
+    width: 460px;
+    position: absolute;
+    left: 5px;
+    height: 32px;
+    line-height: 32px;
+    top: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.timerulerCon {
+    float: left;
+}
+
+.timerulerUl {
+    width: 574px;
+    margin: 15px auto;
+    overflow: hidden;
+}
+
+.timerulerUl li {
+    width: 82px;
+    height: 32px;
+    line-height: 32px;
+    float: left;
+    text-align: center;
+    background: #e1e7f6;
+    cursor: pointer;
+}
+
+.timerulerUl li.active {
+    background: #6785cf;
+    color: #fff;
+}
+
+.timeruler-btn {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.logintimeInput {
+    position: relative;
+    width: 100%;
+    cursor: pointer;
+}
+
+.timeRulerConBox {
+    height: 86px;
+    position: relative;
+    width: 4270px;
+}
+
+.container .row {
+    float: none;
+}
+
+.watermark-switch {
+    margin-left: 10px;
+    position: relative;
+    top: -3px;
+}
+
+.watermark-group .gd-checkbox {
+    margin-right: 10px;
+}
+
+.watermark-position .gd-checkbox {
+    margin-left: 10px;
+}
+
+.watermark-style .gd-select {
+    width: 80px;
+}
+
+.watermark-select {
+    display: inline-block;
+    margin-right: 15px;
+    position: relative;
+}
+
+.watermark-coloritem {
+    display: inline-block;
+    width: 100%;
+    height: 10px;
+    border: 1px solid #e7e9ef;
+    box-sizing: border-box;
+}
+
+.audit-switch {
+    margin-left: 10px;
+    position: relative;
+    top: -3px;
+}
+
+.audit-filepanel {
+    display: inline-block;
+    border: 1px solid #e7e9ef;
+    width: 300px;
+    vertical-align: middle;
+}
+
+.audit-filepanel-title {
+    text-align: center;
+    line-height: 48px;
+    border-bottom: 1px solid #e7e9ef;
+    background: #f7f7f9;
+}
+
+.audit-filetree {
+    height: 180px;
+    overflow: auto;
+}
+
+.audit-already-file {
+    padding: 5px 20px;
+}
+
+.audit-already-file .icon-folder {
+    color: #cfd6e1;
+    margin-right: 5px;
+}
+
+.colpick.colpick_full {
+    position: fixed !important;
+    padding: 5px;
+}
+
+.watermark-colorpick .gd-select-drop {
+    overflow: visible;
+}
+
+.watermark-colorpick .gd-select-input .gd-input:enabled {
+    background: none;
+    color: transparent;
+}
+
+#watermarkColorDisplay {
+    position: absolute;
+    width: 54px;
+    height: 16px;
+    left: 38px;
+    top: 8px;
+    background: none;
+    border: 1px solid #e7e9ef;
+    box-sizing: border-box;
+    z-index: 0;
+    cursor: pointer;
+}

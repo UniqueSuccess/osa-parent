@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.core.mapper.UkeyMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.core.entity.Ukey">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="sign" property="sign" />
+        <result column="user_guid" property="userGuid" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, sign, user_guid, create_time
+    </sql>
+    <select id="getUkeyCount" resultType="java.lang.Integer">
+        SELECT count(uk.id) from t_ukey uk
+        LEFT JOIN t_user u ON u.guid = uk.user_guid
+        <where>
+            <if test="searchStr != null">
+                uk.name like #{searchStr}
+                or uk.sign like #{searchStr}
+                or uk.create_time like #{searchStr}
+                or u.`name` like #{searchStr}
+            </if>
+        </where>
+    </select>
+
+    <select id="getUkeyListInPage" resultType="com.goldencis.osa.core.entity.Ukey">
+        select
+        uk.id,
+        uk.name,
+        uk.sign,
+        uk.user_guid as userGuid,
+        uk.create_time as createTime,
+        u.name as uname
+        from t_ukey uk
+        LEFT JOIN t_user u ON u.guid = uk.user_guid
+        <where>
+            <if test="searchStr != null">
+                uk.name like #{searchStr}
+                or uk.sign like #{searchStr}
+                or uk.create_time like #{searchStr}
+                or u.`name` like #{searchStr}
+            </if>
+        </where>
+        <if test="orderColumn != null and orderColumn != '' and orderType != null and orderType != ''">
+            ORDER BY #{orderColumn} #{orderType}
+        </if>
+        <if test="start != null and length != null">
+            limit #{start} , #{length}
+        </if>
+    </select>
+
+</mapper>

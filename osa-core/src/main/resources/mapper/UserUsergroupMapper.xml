@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.core.mapper.UserUsergroupMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.core.entity.UserUsergroup">
+        <id column="user_guid" property="userGuid" />
+        <result column="usergroup_id" property="usergroupId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        user_guid, usergroup_id
+    </sql>
+
+    <!-- 根据用户id删除用户和用户组关联表记录 -->
+    <delete  id="deleteUserUsergroupByUserGuid" parameterType="String" >
+        delete from t_user_usergroup
+        where  user_guid=#{value}
+    </delete>
+
+    <!-- 添加用户与用户组关联记录 -->
+    <insert id="saveUserUsergroup" parameterType="com.goldencis.osa.core.entity.UserUsergroup" >
+         INSERT INTO t_user_usergroup (user_guid, usergroup_id)
+          VALUES(#{userGuid}, #{usergroupId})
+    </insert>
+
+</mapper>

@@ -1,0 +1,24 @@
+<div th:fragment="topleftbar">
+	<div id="framework" v-cloak >
+		<gd-leftmenu :config="leftMenuConfig"></gd-leftmenu>
+		<gd-topbar :config="topbarConfig"></gd-topbar>
+		<div class="showUserInfo container" id="showUserInfo" style="display:none">
+			<form>
+				<div class="row">
+					<label class="gd-label-required">原密码</label>
+					<input type="password" name="oldPwd" class="gd-input" maxlength="20">
+				</div>
+				<div class="row">
+					<label class="gd-label-required">新密码</label>
+					<input id="pw" type="password" name="newPwd" :gdv-minlength="pwLength" class="gd-input" gd-validate="required minLength maxLength hasNumber hasLowerCase hasCapital" gdv-maxlength="20" >
+				</div>
+				<div class="row">
+					<label class="gd-label-required">确认密码</label>
+					<input id="equalPw" type="password" class="gd-input" gd-validate="required equalTo" gdv-equal="pw">
+				</div>
+			</form>
+		</div>
+	</div>
+	<script th:src="@{/js/encrypt.js}"></script>
+	<script th:src="@{/js/sha256.js}"></script>
+</div>

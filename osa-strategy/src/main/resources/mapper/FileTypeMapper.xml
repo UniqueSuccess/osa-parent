@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.strategy.mapper.FileTypeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.strategy.entity.FileType">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="pid" property="pid" />
+        <result column="level" property="level" />
+        <result column="compositor" property="compositor" />
+        <result column="status" property="status" />
+        <result column="icon" property="icon" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, pid, level, compositor, status, icon
+    </sql>
+
+</mapper>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="./js/resource.js"></script>
+    <style>
+        .d1 {
+            width: 200px;
+            height: 30px;
+            background: red;
+        }
+
+        .d1::after {
+            content: ' ';
+            width: 30px;
+            height: 30px;
+            background: blue;
+            display: inline-block;
+        }
+
+        .s1~* {
+            background: blue;
+        }
+
+        .s2 {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div id="framework" v-cloak>
+        <gd-leftmenu :config="leftMenuConfig"></gd-leftmenu>
+        <gd-topbar :config="topbarConfig"></gd-topbar>
+    </div>
+    <div id="app" class="gd-right-content" v-cloak>
+        <div class="d1">
+            <span class="s1"></span>
+            <span class="s2"></span>
+        </div>
+        <!-- <div class="d2"></div> -->
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+
+        });
+    </script>
+</body>
+
+</html>

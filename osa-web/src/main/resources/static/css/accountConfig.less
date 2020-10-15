@@ -1,0 +1,349 @@
+
+body{
+    background:#f7f7f9
+}
+
+.contentR{
+    background:#fff;
+}
+
+[v-cloak] {
+  display: none;
+}
+
+.contentL{
+    width:280px;
+    .contentLBox{
+        padding:20px;
+        height:100%
+    }
+    i.icon-add{
+        margin:0 0 0 10px
+    }
+    .gd-toolbar{
+        height:46px;
+        padding:0;
+        background:#f2f2f6
+    }
+}
+.sysAccountBox{
+    .gd-iconinput input, .gd-input{
+        width:160px
+    }
+    i.icon-add{
+        margin:0 0 0 10px
+    }
+}
+
+.permission-list-box{
+    overflow-y:auto;
+    height: calc(~"100% - 56px");
+    margin-top:10px;
+    li{
+        height:40px;
+        line-height:40px;
+        cursor:pointer;
+        overflow:hidden;
+        padding:0 0 0 32px;
+        i{
+            color:#ddd;
+            margin-right:10px
+        }
+        span.icon{
+            margin-right:5px;
+            color:#6785CF;
+            position:absolute;
+            left:12px;
+        }
+        .list-oper{
+            float:right
+        }
+        &:hover{
+            background:#fff
+        }
+    }
+    li.active{
+        background:#fff;
+        border-left:2px solid #6785CF;
+    }
+       
+}
+
+.gd-tab-horizontal{
+    height:100%;
+    overflow:hidden;
+}
+
+.gd-tab-horizontal>div.gd-tab-content .gd-tab-item{
+    padding:0
+}
+
+.gd-tab-horizontal>ul.gd-tab-bar{
+    width:auto;
+    margin:1px 0 0 2px   
+}
+
+#addSysAccount .gd-select{
+    width:280px;
+}
+
+.titleBox{
+    margin-left:20px;
+    height:40px;
+    line-height:38px;
+    font-size:16px;
+}
+
+.htmlBox{
+    padding:20px
+}
+
+.htmlBoxCon{
+    margin-left:50px;
+    margin-top:10px;
+    .gd-toolbar{
+        background:#fff;
+        height:50px;
+        padding:0 20px
+    }
+    .tableContent{
+        height:290px;
+        border:1px solid #eee;
+        border-top:none;
+    }
+
+    .gd-table-wrapper{
+        height: calc(~"100% - 50px");
+    }
+}
+
+#auditAuthHtmlBox{
+    .tableContent{
+        border-top:1px solid #eee;
+    }
+}
+
+
+.nonSelect-asset{
+    width:330px;
+    height:350px;
+    border:1px solid #E7E9EF;
+    float:left;
+}
+
+.nonSelect-asset .gd-tree{
+    border:0;
+    height:305px;
+}
+
+.select-asset{
+    margin-left:20px;
+    width:330px;
+    height:350px;
+    border:1px solid #E7E9EF;
+    float:left;
+}
+
+.asset-select-title{
+    padding-left:20px;
+    border-bottom:1px solid #E7E9EF;
+    height:44px;
+    line-height: 44px;
+    background:#F7F7F9;
+}
+
+.select-asset ul{
+    height:305px;
+    overflow-y:auto;
+}
+
+.select-asset ul li{
+    height:30px;
+    line-height:30px;
+    padding:0 20px;
+    font-size:14px;
+}
+
+.select-asset ul li i{
+    font-size:18px;
+    margin-right:12px;
+    color:#6785CF ;
+}
+
+
+.left-content-box{
+    overflow: auto;
+}
+/*内容区*/
+.navigation-row0{
+    display: inline-block;
+    margin-right: 30px;
+}
+.navigation-level1 {
+    padding: 0 20px;
+    line-height: 36px;
+    font-size: 0;
+}
+
+.navigation-level2 {
+    padding-left: 86px;
+}
+
+.navigation-level3 {
+    padding-left: 130px;
+}
+
+.navigation-level4 {
+    padding-left: 176px;
+}
+
+.navigation-item {
+    height: 36px;
+    float: left;
+    line-height: 36px;
+    font-size: 0;
+    margin: 0 10px;
+}
+.navigation-item-tip{
+    color:#C3C3C3;
+    font-size:14px;
+    line-height: 36px;
+    position: relative;
+    margin-left: 20px;
+    display: inline-block;
+    text-indent: 10px;
+    &:before{
+        content: " ";
+        display: inline-block;
+        background:#C3C3C3;
+        width:1px;
+        position: absolute;
+        height: 16px;
+        top:50%;
+        left:0;
+        transform: translateY(-50%);
+    }
+}
+.navigation-label {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 14px;
+    line-height: 36px;
+}
+
+.navigation-box {
+    height: calc(~"100% - 75px");
+    overflow: auto;
+    .navigation-row {
+        font-size: 0;
+        &:nth-child(odd) {
+            background: #f7f7f7;
+        }
+        &:nth-child(even) {
+            background: white;
+        }
+        .iconfont{
+            display: inline-block;
+            vertical-align: top;
+            margin-right: 10px;
+            color: #cfd6e1;
+        }
+    }
+}
+
+.navigation-icon {
+    display: inline-block;
+    height: 36px;
+    width: 36px;
+    background-repeat: no-repeat;
+    background-position: center -23px;
+    vertical-align: middle;
+}
+
+.navigation-check {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 15px;
+}
+
+
+/*弹窗*/
+
+// 表单
+.wind-form{
+    padding-left: 50px;
+    .wind-row, .wind-row-item{
+        position: relative;
+    }
+}
+
+.wind-row {
+    padding: 6px 0;
+    position: relative;
+}
+
+.wind-label {
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 4px;
+    width: 110px;
+    text-align: right;
+    font-size: 14px;
+    padding:0 5px;
+}
+
+.form-input, .wind-select {
+    width: 330px;
+    height: 32px;
+    box-sizing: border-box;
+    border: 1px solid #E5E5E5;
+    padding: 0 5px;
+}
+.wind-select option{
+    height: 32px;
+    line-height: 32px;
+}
+
+.wind-left{
+    width: 50%;
+    float: left;
+}
+
+
+
+.save-wrap{
+    width: 100%;
+    padding-left:30px;
+    padding-top:20px;
+    padding-bottom:20px;
+    background-color: #fff;
+    position: fixed;
+    bottom: 20px;
+    &.active{
+        box-shadow: 0 -2px 6px #f2f2f2;
+    }
+}
+
+.j-role-type .my-multiselect .dropdown-menu li a{
+    label{
+        margin:5px 0;
+        input{
+            display:none
+        }
+    }
+    padding:2px 10px
+} 
+
+#addAuditAuth{
+    margin:20px;
+    overflow:hidden
+}
+
+.nonSelect-ul{
+    padding:10px 0;
+    li{
+        height:32px;
+        line-height:32px;
+        margin-left:20px
+    }
+}

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.approval.mapper.ApprovalDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.approval.entity.ApprovalDetail">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="flow_id" property="flowId" />
+        <result column="point_id" property="pointId" />
+        <result column="senior_id" property="seniorId" />
+        <result column="approver" property="approver" />
+        <result column="result" property="result" />
+        <result column="remark" property="remark" />
+        <result column="standard" property="standard" />
+        <result column="modify_time" property="modifyTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, flow_id, point_id, senior_id, approver, result, remark, standard, modify_time
+    </sql>
+
+    <!-- 根据授权id 删除授权 -->
+    <delete id="deleteGrantedById" parameterType="java.lang.Integer">
+          DELETE FROM t_granted
+          WHERE id = #{value }
+    </delete>
+
+    <!-- 根据授权id 修改授权状态-->
+    <update id="updateGrantedStatusByGrantedId">
+        UPDATE t_granted
+        SET status = #{approvalResult}
+        <if test="isdelete != null">
+          , isdelete = #{isdelete}
+        </if>
+        WHERE id = #{grantedId}
+    </update>
+
+    <!-- 根据设备id 删除设备账号表中的记录、删除设备设备组中间表、删除SSO(单点登录)从表信息、删除从表 -->
+    <delete id="deleteAssetRelatedByAssetId" parameterType="java.lang.Integer">
+          DELETE FROM t_asset_account WHERE asset_id=#{value};
+          DELETE FROM t_asset_assetgroup WHERE asset_id=#{value};
+          DELETE FROM t_sso_rule  WHERE asset_id=#{value} ;
+          DELETE FROM t_asset_bs WHERE asset_id=#{value};
+          DELETE FROM t_asset_cs WHERE asset_id=#{value};
+          DELETE FROM t_asset_db WHERE asset_id=#{value};
+          DELETE FROM t_asset WHERE id=#{value};
+    </delete>
+
+    <delete id="deleteAccountByAccountId" parameterType="java.lang.Integer">
+        DELETE FROM t_asset_account
+        WHERE id = #{value}
+    </delete>
+    <delete id="deleteAssetGroupRelatedByAssetGroupId">
+        DELETE FROM t_user_asset_assetgroup WHERE assetgroup_id=#{assetGroupId};
+        DELETE FROM t_granted WHERE assetgroup_id=#{assetGroupId};
+        delete from t_assetgroup where id=#{assetGroupId};
+    </delete>
+
+    <select id="getAssetCountByAssetGroupId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT count(asset_id) FROM t_asset_assetgroup WHERE assetgroup_id=#{assetGroupId}
+    </select>
+    <select id="getChildCountByAssetGroupId" resultType="java.lang.Integer">
+        SELECT COUNT(id) from t_assetgroup WHERE pid=#{assetGroupId}
+    </select>
+</mapper>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.core.mapper.QuartzJobMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.core.entity.QuartzJob">
+        <id column="job_id" property="jobId" />
+        <result column="job_name" property="jobName" />
+        <result column="job_group" property="jobGroup" />
+        <result column="job_status" property="jobStatus" />
+        <result column="concurrent" property="concurrent" />
+        <result column="cron_ex" property="cronEx" />
+        <result column="description" property="description" />
+        <result column="bean_id" property="beanId" />
+        <result column="job_class" property="jobClass" />
+        <result column="method_name" property="methodName" />
+        <result column="start_time" property="startTime" />
+        <result column="previous_time" property="previousTime" />
+        <result column="next_time" property="nextTime" />
+        <result column="inversion_method_name" property="inversionMethodName" />
+        <result column="inversion_class" property="inversionClass" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        job_id, job_name, job_group, job_status, concurrent, cron_ex, description, bean_id, job_class, method_name, start_time, previous_time, next_time, inversion_method_name, inversion_class
+    </sql>
+
+    <select id="selectJobList" resultType="com.goldencis.osa.core.entity.QuartzJob">
+        SELECT
+        job_id jobId,
+        job_name jobName,
+        job_group jobGroup,
+        job_status jobStatus,
+        CONCURRENT,
+        cron_ex cronEx,
+        description,
+        bean_id beanId,
+        job_class jobClass,
+        method_name methodName,
+        start_time startTime,
+        previous_time previousTime,
+        next_time nextTime,
+        inversion_class inversionClass,
+        inversion_method_name inversionMethodName
+        FROM
+        t_quartz_job
+    </select>
+    <update id="updateCron">
+        update t_quartz_job set cron_ex=#{scheduleJob.cronEx}
+        where job_name=#{scheduleJob.jobName} and
+        job_group=#{scheduleJob.jobGroup}
+    </update>
+</mapper>

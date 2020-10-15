@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.core.mapper.DepartmentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.core.entity.Department">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="pid" property="pid" />
+        <result column="department_remark" property="departmentRemark" />
+        <result column="owner" property="owner" />
+        <result column="department_tel" property="departmentTel" />
+        <result column="tree_path" property="treePath" />
+        <result column="level" property="level" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, pid, department_remark, owner, department_tel, tree_path, level, status
+    </sql>
+
+    <select id="getDepartmentListByLoginUserGuid" resultType="com.goldencis.osa.core.entity.Department">
+        SELECT <include refid="Base_Column_List"></include>
+        FROM t_department d
+        WHERE d.id IN (
+                        SELECT ud.department_id
+                        FROM t_user_department ud
+                        WHERE ud.user_guid = #{guid}
+        )
+    </select>
+
+    <select id="getDepartmentListByPid" resultType="com.goldencis.osa.core.entity.Department">
+        SELECT <include refid="Base_Column_List"></include>
+        FROM t_department d
+        WHERE d.tree_path LIKE (
+                      SELECT CONCAT(cd.tree_path, '%')
+                      FROM t_department cd
+                      WHERE cd.id = #{id}
+        )
+    </select>
+
+</mapper>

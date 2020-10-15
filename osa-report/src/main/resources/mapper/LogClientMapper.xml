@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.report.mapper.LogClientMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.report.entity.LogClient">
+        <id column="id" property="id" />
+        <result column="data_type" property="dataType" />
+        <result column="dev_unique" property="devUnique" />
+        <result column="computer_name" property="computerName" />
+        <result column="time" property="time" />
+        <result column="user_guid" property="userGuid" />
+        <result column="local_ip" property="localIp" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+       lc.id, lc.data_type, lc.dev_unique, lc.computer_name, lc.time, lc.user_guid, lc.local_ip
+    </sql>
+
+    <!-- 分页查询条件 -->
+    <sql id="page_select">
+        <if test="searchStr !=null">
+            AND ( ug.`name` like #{searchStr} or u.`username` like #{searchStr} or u.`name` like #{searchStr} or
+            lc.local_ip like  #{searchStr} or lcf.file_name like #{searchStr} or lcf.src_path like #{searchStr} or
+            lcf.dst_path like #{searchStr}  )
+        </if>
+        <if test="fileOpsTypeLists != null and fileOpsTypeLists.size()>0 ">
+            AND lcf.optype IN
+            <foreach collection="fileOpsTypeLists" open="(" separator="," close=")" item="fileOpsTypeItem">
+                #{fileOpsTypeItem}
+            </foreach>
+        </if>
+        <if test="startTime != null">
+            AND lc.time &gt; #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND lc.time &lt; #{endTime}
+        </if>
+    </sql>
+
+    <!-- 查询数量 -->
+    <select id="countFileOpsInPage" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM
+        (
+            SELECT lc.id
+            FROM t_log_client lc
+            LEFT JOIN t_log_client_file lcf ON  lcf.`log_id` = lc.`id`
+            LEFT JOIN t_user u  ON u.`guid`= lc.`user_guid`
+            LEFT JOIN t_user_usergroup  uug ON uug.`user_guid` = u.`guid`
+            LEFT JOIN t_usergroup ug ON ug.id = uug.`usergroup_id`
+            <where>
+                <include refid="page_select"></include>
+            </where>
+            GROUP BY lc.id
+        ) f
+    </select>
+
+    <!-- 分页 -->
+    <select id="getFileOpsInPage" resultType="com.goldencis.osa.report.entity.LogClient">
+        SELECT lc.*,lcf.*,u.`username` AS userName,u.`name` AS userFullName,
+        GROUP_CONCAT(ug.id SEPARATOR ',') AS usergroupIds,
+        GROUP_CONCAT(ug.name SEPARATOR ',') AS usergroupNames
+        FROM t_log_client lc
+        LEFT JOIN t_log_client_file lcf ON  lcf.`log_id` = lc.`id`
+        LEFT JOIN t_user u  ON u.`guid`= lc.`user_guid`
+        LEFT JOIN t_user_usergroup  uug ON uug.`user_guid` = u.`guid`
+        LEFT JOIN t_usergroup ug ON ug.id = uug.`usergroup_id`
+        <where>
+            <include refid="page_select"></include>
+        </where>
+        GROUP BY lc.id
+        <if test="orderType == 'desc'">
+            ORDER BY lc.time DESC
+        </if>
+        <if test="orderType == 'asc'">
+            ORDER BY lc.time ASC
+        </if>
+        limit #{start} , #{length}
+    </select>
+
+    <!-- 获取文件操作数量 -->
+    <select id="getLogClientFileType" resultType="com.goldencis.osa.report.entity.LogClientFileType">
+        SELECT COUNT(1) AS optNums,lcf.optype
+        FROM t_log_client lc
+        LEFT JOIN t_log_client_file lcf ON  lcf.`log_id` = lc.`id`
+        <where>
+            <if test="startTime != null">
+                AND lc.time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND lc.time &lt; #{endTime}
+            </if>
+        </where>
+        GROUP BY lcf.`optype`
+    </select>
+
+</mapper>

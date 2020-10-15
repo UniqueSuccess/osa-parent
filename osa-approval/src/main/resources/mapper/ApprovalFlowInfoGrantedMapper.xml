@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.approval.mapper.ApprovalFlowInfoGrantedMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.approval.entity.ApprovalFlowInfoGranted">
+        <id column="id" property="id" />
+        <result column="flow_id" property="flowId" />
+        <result column="granted_id" property="grantedId" />
+        <result column="assettype_id" property="assettypeId" />
+        <result column="assettype_name" property="assettypeName" />
+        <result column="asset_id" property="assetId" />
+        <result column="asset_name" property="assetName" />
+        <result column="asset_ip" property="assetIp" />
+        <result column="asset_account_id" property="assetAccountId" />
+        <result column="asset_account_name" property="assetAccountName" />
+        <result column="assetgroup_id" property="assetgroupId" />
+        <result column="assetgroup_name" property="assetgroupName" />
+        <result column="assetgroup_relation_number" property="assetgroupRelationNumber" />
+        <result column="assetgroup_pid" property="assetgroupPid" />
+        <result column="assetgroup_pname" property="assetgroupPname" />
+        <result column="user_id" property="userId" />
+        <result column="user_name" property="userName" />
+        <result column="user_username" property="userUsername" />
+        <result column="usergroup_ids" property="usergroupIds" />
+        <result column="usergroup_names" property="usergroupNames" />
+        <result column="usergroup_relation_number" property="usergroupRelationNumber" />
+        <result column="usergroup_pid" property="usergroupPid" />
+        <result column="usergroup_pname" property="usergroupPname" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        fg.id,  fg.flow_id,  granted_id,  assettype_id,  assettype_name, asset_id, asset_name, asset_ip, asset_account_id, asset_account_name, assetgroup_id, assetgroup_name,
+         assetgroup_relation_number,assetgroup_pid,assetgroup_pname,user_id, user_username, user_name, usergroup_ids, usergroup_names,usergroup_relation_number,usergroup_pid,usergroup_pname
+    </sql>
+
+    <!-- 获取分页设备的数量 -->
+    <select id="countAssetInFlowGranted" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT  COUNT(DISTINCT(asset_id) ) AS assetNum
+        FROM t_approval_flow_info_granted fg
+        WHERE  fg.flow_id = #{value }
+    </select>
+
+    <!-- 分页查询sql -->
+    <sql id="page_select_sql">
+        <if test="searchStr !=null">
+            AND ( fg.assettype_name LIKE #{searchStr} OR fg.asset_name LIKE #{searchStr} OR fg.asset_account_name LIKE #{searchStr}
+                  OR fg.assetgroup_name LIKE #{searchStr} OR fg.user_username LIKE #{searchStr} OR fg.usergroup_names LIKE #{searchStr})
+        </if>
+    </sql>
+
+    <!-- 分页获取授权审批数据 数量 -->
+    <select id="countApprovalFlowGrantedsDetailInPage" parameterType="map" resultType="Integer">
+        SELECT COUNT(1) FROM t_approval_flow_info_granted fg
+        <where>
+            <include refid="page_select_sql"></include>
+            <if test="flowId != null">
+                AND fg.flow_id = #{flowId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 分页获取授权审批数据 详细 -->
+    <select id="getApprovalFlowGrantedsDetailInPage" parameterType="map" resultType="com.goldencis.osa.approval.entity.ApprovalFlowInfoGranted">
+        SELECT <include refid="Base_Column_List"></include> , f.granted_method as grantedMethod ,f.definition_id as definitionId
+        FROM t_approval_flow_info_granted fg
+        LEFT JOIN t_approval_flow f ON f.id =  fg.flow_id
+        <where>
+            <include refid="page_select_sql"></include>
+            <if test="flowId != null">
+                AND fg.flow_id = #{flowId}
+            </if>
+        </where>
+        GROUP BY fg.id
+        ORDER BY fg.id DESC
+        limit #{start} , #{length}
+    </select>
+
+</mapper>

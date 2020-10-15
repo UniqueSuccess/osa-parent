@@ -1,0 +1,360 @@
+.home-box {
+    height: calc(100% - 40px);
+    width: calc(100% - 40px);
+    padding: 20px;
+    background-color: #F4F4F6;
+}
+
+.home-box .column {
+    float: left;
+    width: 33%;
+    height: 100%;
+}
+
+.home-box .column:nth-child(1) {
+    margin-right: 10px;
+    width: calc(33% - 10px);
+}
+
+.home-box .column:nth-child(2) {
+    margin: 0 10px;
+    width: calc(34% - 20px);
+}
+
+.home-box .column:nth-child(3) {
+    margin-left: 10px;
+    width: calc(33% - 10px);
+}
+
+/* 行公共样式 */
+.home-box .column div.top-cell {
+    height: 150px;
+    background-color: #fff;
+}
+
+.home-box .column div.cell {
+    height: calc((100% - 150px) / 2 - 20px);
+    margin-top: 20px;
+    background-color: #fff;
+}
+
+.home-box .column div.cell p {
+    height: 16px;
+    margin: 0;
+    padding: 20px 0 0 20px;
+}
+
+.home-box .column div.cell .echars-box {
+    height: calc(100% - 36px);    /* background: #ccc; */
+}
+
+.home-box .column div.top-cell > div {
+    float: left;
+    height: 100%;
+    width: calc(50% - 10px);
+    color: #fff;
+    box-shadow: 0 0 10px 0;
+    position: relative;
+    border-radius: 2px;
+}
+
+.home-box .column div.top-cell > div p {
+    margin: 0;
+    padding: 20px 0 0 20px;
+    font-size: 14px;
+}
+
+.home-box .column div.top-cell > div div {
+    width: 100%;
+    font-size: 36px;
+    height: 40px;
+    line-height: 40px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.home-box .column div.top-cell > div div span {
+    display: inline-block;
+}
+
+.home-box .column div.top-cell > div div span:nth-child(1) {
+    height: 40px;
+    width: 36px;
+}
+
+.home-box .column div.top-cell > div div span:nth-child(2) {
+    position: relative;
+    top: -5px;
+    left: -10px;
+    font-weight: 600;
+}
+
+.home-box .column div.top-cell > div:first-child {
+    margin-right: 10px;
+}
+
+.home-box .column div.top-cell > div:last-child {
+    margin-left: 10px;
+}
+
+#resource_num, #active_account, #resource_operate, #opera_num, #opera_num1 {
+    height: 100%;
+    width: 100%;
+}
+
+#opera_num1 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+#opera_num {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+
+#conversationTable {
+    padding: 20px 0px 0  0px;
+    height: calc(100% - 20px);
+}
+
+.home-box .column div.top-cell > div.no-right {
+    padding-right: 10px;
+    margin-right: 0px;
+}
+
+.home-box .column div.top-cell > div.no-left {
+    padding-left: 10px;
+    margin-left: 0;
+}
+
+.home-box .column div.top-cell > div .top-center-box {
+    height: 100px;
+    border-right: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.home-box .column div.top-cell > div .top-center-box span {
+    display: inline-block;
+}
+
+.home-box .column div.top-cell > div .top-center-box div {
+    width: 100%;
+    font-size: 36px;
+    height: auto;
+    position: relative;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.home-box .column div.top-cell > div .top-center-box span:nth-child(1) {
+    height: 40px;
+    width: 36px;
+    margin-right: 4px;
+}
+
+.home-box .column div.top-cell > div .top-center-box span:nth-child(2) {
+    position: relative;
+    top: -5px;
+    left: -10px;
+    font-weight: 100;
+}
+
+.home-box .column div.top-cell > div .top-center-box div.shenpi {
+    font-size: 14px;
+    color: #666;
+    height: 20px;
+    line-height: 20px;
+    top: 25%;
+}
+
+.home-box .column div.top-cell > div.no-right {
+    border-top: 4px solid #6785CF;
+    box-sizing: border-box;
+}
+
+.home-box .column div.top-cell > div.no-left {
+    border-top: 4px solid #25C2AA;
+    box-sizing: border-box;
+}
+
+.home-box .column div.top-cell > div.no-right .top-center-box {
+    color: #6785CF;
+}
+
+.home-box .column div.top-cell > div.no-left .top-center-box {
+    color: #25C2AA;
+}
+
+.deepblue-box {
+    background: linear-gradient(to right, #395FBF, #6785CF);
+}
+
+.deepblue-box span:nth-child(1) {
+    background: url(../images/home_index/user.png) no-repeat center;
+}
+
+.blue-box {
+    background: linear-gradient(to right, #1B81D3, #61B0F0);
+}
+
+.blue-box span:nth-child(1) {
+    background: url(../images/home_index/host.png) no-repeat center;
+}
+
+.green-box {
+    background: linear-gradient(to right, #26A5A0, #35D0B8);
+}
+
+.green-box span:nth-child(1) {
+    background: url(../images/home_index/online_user.png) no-repeat center;
+    margin-right: 4px;
+}
+
+.gray-box {
+    background: linear-gradient(to right, #E48228, #F5A623);
+}
+
+.gray-box span:nth-child(1) {
+    background: url(../images/home_index/dialogue.png) no-repeat center;
+    margin-right: 4px;
+}
+
+.shenpitalk {
+    background: url(../images/home_index/approval.png) no-repeat center;
+}
+
+.shenpicommand {
+    background: url(../images/home_index/command.png) no-repeat center;
+}
+.home-box .column div.cell .echars-box.operanote{
+    overflow: hidden;
+    margin: 10px 0;
+    height: calc(100% - 56px);
+}
+.operanote .gd-none-data {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+.operanote ul {
+    height: calc(100% - 40px);
+    width: calc(100% - 52px);
+    margin: 20px 20px;
+    padding-left: 12px;
+    /* overflow: auto; */
+}
+
+.operanote ul li {
+    padding-bottom: 20px;
+    padding-left: 20px;
+    border-left: 1px solid #ccc;
+    position: relative;
+}
+
+.operanote ul li:first-child {
+
+    /* margin-top: 15px; */
+}
+
+.operanote ul li:before {
+    content: '';
+    background: url(../images/home_index/operation_user.png) no-repeat center;
+    position: absolute;
+    top: 0px;
+    z-index: 2;
+    width: 30px;
+    height: 24px;
+    left: -16px;
+}
+
+.operanote ul li div {
+    line-height: 24px;
+}
+
+.operanote ul li .username {
+    font-weight: 600;
+}
+
+.opera-legend {
+    float: right;
+    padding: 20px 0 0 0;
+}
+
+.opera-legend li {
+    float: left;
+}
+
+.opera-legend li:nth-child(even) {
+    margin-right: 15px;
+}
+
+.opera-legend li:nth-child(odd) {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+    margin-top: 3px;
+}
+
+.host-bgcolor {
+    background-color: #456CCC;
+}
+
+.net-bgcolor {
+    background-color: #6785CF;
+}
+
+.sql-bgcolor {
+    background-color: #58A5E3;
+}
+
+.app-bgcolor {
+    background-color: #B3E5FC;
+}
+
+.operanote .gd-home-hide {
+    display: none;
+
+}
+
+.circle-title{
+    margin-top: 10px;
+}
+.circle-title span{
+    display: inline-block;
+    margin-right: 10px;
+}
+.circle-title span:first-child{
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+}
+
+
+@media screen and (min-device-width:1026px) and (max-device-width:1367px) {
+    .opera-legend li:nth-child(even) {
+        margin-right: 10px;
+    }
+    .opera-legend li:nth-child(odd) {
+        margin-right: 5px;
+    }
+    /* 行公共样式 */
+    .home-box .column div.top-cell {
+        height: 120px;
+    }
+
+    .home-box .column div.cell {
+        height: calc((100% - 120px) / 2 - 20px);
+    }
+
+}

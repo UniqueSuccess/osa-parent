@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.asset.mapper.AssetBsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.asset.entity.AssetBs">
+        <result column="asset_id" property="assetId" />
+        <result column="publish" property="publish" />
+        <result column="operation_tool" property="operationTool" />
+        <result column="fill_out" property="fillOut" />
+        <result column="form_name" property="formName" />
+        <result column="form_commit_mode" property="formCommitMode" />
+        <result column="command" property="command" />
+        <result column="login_url" property="loginUrl" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        asset_id, publish, operation_tool, fill_out, form_name, form_commit_mode, command, login_url
+    </sql>
+
+    <select id="selectResourceDetailByAssetId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_asset_bs bs
+        where bs.asset_id=#{assetId}
+    </select>
+</mapper>

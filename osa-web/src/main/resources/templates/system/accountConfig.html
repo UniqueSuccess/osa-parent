@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/accountConfig.css}" />
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body>
+	<div th:replace="common/topLeft :: topleftbar"></div>
+
+	<div class="gd-right-content container" id="contentDiv">
+		<gd-tab>
+		    <gd-tab-item label="角色">
+		        <div class="contentL">
+					<gd-toolbar :config="sysRoleTopbar"></gd-toolbar>
+					<ul id="permission_list_box" class="permission-list-box">
+					    <li v-for="item,index in sysRoleListArr" v-cloak @click="sysRoleChange(item.guid,index,item.type)" :class="index==0?'active':''"  :data-id="item.guid" >
+					    	<span class="icon" v-if="item.type==1"><span :class="item.icon"></span></span>
+					        <span class="list-name">{{item.name}}</span>
+					        <span class="list-oper" style="font-size: 12px;" v-if="item.type!=1">
+					            <i class="icon-edit" title="编辑" v-if="allowEditRole" @click="editRole(item.guid,item.name)"></i>
+					            <i class="icon-delete" title="删除" v-if="allowDeleteRole" @click="deleteRole(item.guid)"></i>
+					        </span>
+					    </li>
+					</ul>
+				</div>
+				<div class="contentR">
+		            <div id="navigation_box" class="navigation-box"></div>
+                    <div class="save-wrap active" id="save_navigation_box" v-if="allowSaveRole">
+                    	<button id="save_navigation" type="button" class="gd-btn" enter="" @click="saveNavigation">保存</button>
+                    </div>
+				</div>
+		    </gd-tab-item>
+		    <gd-tab-item label="系统账号">
+		         <div class="contentL sysAccountBox">
+		         	<gd-toolbar :config="sysAccountTopbar"></gd-toolbar>
+					<ul id="permissionUser_list_box" class="permission-list-box">
+					    <li class="left-list" v-for="item,index in sysAccountListArr" @click="sysAccountChange(item.guid,index)" :class="index==0?'active':''"  :data-id="item.guid">
+					        <span class="list-name">{{item.name}}</span>
+					        <span class="list-oper" style="font-size: 12px;" v-if="item.guid !=2 && item.guid!=3 && item.guid !=4">
+					            <i class="icon-edit" v-if="allowEdit" title="编辑" @click="editSysAccount(item.guid)"></i>
+					            <i class="icon-delete" v-if="allowDelete" title="删除" @click="deleteAccount(item.guid)"></i>
+					        </span>
+					    </li>
+					</ul>
+				</div>
+				<div class="contentR">
+					<div id="assetAuth"></div>
+					<div id="auditAuth"></div>
+				</div>
+		    </gd-tab-item>
+		</gd-tab>
+	</div>
+
+	<!-- 设备权限 -->
+	<script type="text/html" id="assetAuthHtml">
+		<div class="htmlBox" id="assetAuthHtmlBox">
+			<div class="titleBox">设备权限</div>
+			<div class="htmlBoxCon">
+				<gd-tab style="height: 330px;">
+					<gd-tab-item label="设备组">
+				        <div class="tableContent">
+	                        <gd-toolbar :config="toolbarAssetGroupConfig"></gd-toolbar>
+			                <gd-table :config="assetGroupTableConfig"></gd-table>
+		                        <!-- <div class="gd-table-scroll-h">
+		                            <div class="gd-table-head">
+		                                <table>
+		                                    <tr>
+		                                        <th width="10%" align="center"><label class="gd-checkbox"><input type="checkbox"><i></i></label></th>
+		                                        <th width="20%" align="left">名称</th>
+		                                        <th width="20%" align="left">所属组</th>
+		                                        <th width="20%" align="left">设备数</th>
+		                                        <th width="10%" align="left">操作</th>
+		                                    </tr>
+		                                </table>
+		                            </div>
+		                            <div class="gd-table-scroll-v">
+		                                <div class="gd-table-body">
+		                                    <table id="accountCheckTable">
+		                                        <tr v-for="item,index in assetGroupListArr">
+		                                            <td width="10%"><label class="gd-checkbox"><input type="checkbox"><i></i></label></td>
+		                                            <td width="20%">{{item.name}}</td>
+		                                            <td width="20%">{{item.pname}}</td>
+		                                            <td width="20%">{{item.assetCount}}</td>
+		                                            <td width="20%"><button type="button" class="gd-btn-alone icon-delete"></button></td>
+		                                        </tr>
+		                                    </table>
+		                                </div>
+		                            </div>
+		                        </div> -->
+	                    </div>
+				    </gd-tab-item>
+				    <gd-tab-item label="设备">
+				        <div class="tableContent">
+	                        <gd-toolbar :config="toolbarAssetConfig"></gd-toolbar>
+			                <gd-table :config="assetTableConfig"></gd-table>
+	                    </div>
+				    </gd-tab-item>
+				</gd-tab>
+			</div>
+		</div>
+	</script>
+
+	<!-- 审计权限 -->
+	<script type="text/html" id="auditAuthHtml">
+		<div class="htmlBox" id="auditAuthHtmlBox">
+			<div class="titleBox">审计权限</div>
+			<div class="htmlBoxCon">
+				<div class="tableContent">
+		            <gd-toolbar :config="toolbarAuditConfig"></gd-toolbar>
+		            <gd-table :config="auditTableConfig"></gd-table>
+	           	</div>
+			</div>
+		</div>
+	</script>
+
+	<script type="text/html" id="addAuditAuthBox">
+		<div id="addAuditAuth">
+			<div class="nonSelect-asset">
+                <div class="asset-select-title">待选操作员</div>
+                <ul class="nonSelect-ul">
+                	<li v-for="item,index in waitAccountArr" :data-id="item.id" :data-name="item.name"><label class="gd-checkbox"><input type="checkbox" @change="accountChange(index)" v-model="item.checked" :disabled="item.disabled"> <i></i></label>{{item.name}}</li>
+                </ul>
+            </div>
+            <div class="select-asset">
+                <div class="asset-select-title">已选操作员({{auditAuthListLen}})</div>
+                <ul>
+                    <li v-for="item,index in selectAccountArr"><i class="icon icon-user"></i>{{item.name}}</li>
+                </ul>
+            </div>
+		</div>
+	</script>
+
+	<script type="text/html" id="addRoleBox">
+		<div id="addRole">
+			<form id="roleForm" class="container">
+				<div class="row">
+					<label class="gd-label-required">名称</label>
+					<input type="text" class="gd-input" name="name" gd-validate="required maxLength" gdv-maxlength="30" v-model="name">
+				</div>
+			</form>
+		</div>
+	</script>
+
+	<script type="text/html" id="addSysAccountBox">
+		<div id="addSysAccount">
+			<form id="userForm" class="container">
+				<div class="row">
+	                <label class="gd-label-required">名称</label>
+	                <input type="text" class="gd-input" name="name" gd-validate="required maxLength" gdv-maxlength="30" v-model="name">
+	            </div>
+	            <div class="row">
+	                <label class="gd-label-required">账号</label>
+	                <input type="text" class="gd-input" name="username" gd-validate="required normalChar maxLength" gdv-maxlength="30" v-model="username">
+	            </div>
+	            <div class="row">
+	                <label class="gd-label-required">密码</label>
+	                <input type="password" class="gd-input" name="password" gd-validate="required minLength maxLength hasNumber hasLowerCase hasCapital" :gdv-minlength="pwLength" gdv-maxlength="50" v-model="password">
+	            </div>
+	            <div class="row" >
+	                <label>类型</label>
+	                <gd-select placeholder="请选择" name="roleType" :disabled="disabledStatus" v-model="roleType" id="userType">
+                        <gd-option :value="item.guid" v-for="item,index in sysAccountTypeArr">
+                            {{item.name}}
+                        </gd-option>
+                    </gd-select>
+	            </div>
+			</form>
+		</div>
+	</script>
+
+	<!-- 添加设备 -->
+    <script type="text/html" id="authorizedAssetAddBox">
+        <div id="authorizedAssetAdd" class="container">
+            <div class="nonSelect-asset">
+                <div class="asset-select-title">未选设备</div>
+                <gd-tree :config='treeAuthConfig'></gd-tree>
+            </div>
+            <div class="select-asset">
+                <div class="asset-select-title">已选设备({{assetAuthListLen}})</div>
+                <ul>
+                    <li v-for="item,index in assetList"><i class="icon icon-monitor"></i>{{item.assetGroupName}} _ {{item.assetName}}</li>
+                </ul>
+            </div>
+        </div>
+    </script>
+
+    <!-- 添加设备组 -->
+    <script type="text/html" id="authorizedGroupAddBox">
+        <div id="authorizedGroupAdd" class="container">
+            <div class="nonSelect-asset">
+                <div class="asset-select-title">未选设备组</div>
+                <gd-tree :config='treeAuthGroupConfig'></gd-tree>
+            </div>
+            <div class="select-asset">
+                <div class="asset-select-title">已选设备组({{assetGroupAuthListLen}})</div>
+                <ul>
+                    <li v-for="item,index in assetGroupAuthList"><i class="icon icon-file"></i>{{item.assetGroupName}}</li>
+                </ul>
+            </div>
+        </div>
+    </script>
+
+	<script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/encrypt.js}"></script>
+    <script th:src="@{/js/sha256.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/accountConfig.js}"></script>
+
+</body>
+</html>

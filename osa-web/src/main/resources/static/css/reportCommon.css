@@ -1,0 +1,106 @@
+/**
+ * 本css 是 报表的公用css样式 、
+ * 每个报表还有单独的css
+ */
+[class*=gd-btn].gd-btn-icon {
+    background-color: #3F4C59;
+    color: #fff;
+    border-color: #3F4C59;
+}
+
+.gd-toolbar {
+    background-color: #273340;
+}
+
+.search-line .gd-iconinput input,
+.gd-input {
+    background-color: #232D39;
+    color: #fff;
+    border: 1px solid #3F4C59;
+}
+
+/* echars展示 以及背景色修改 */
+.gd-topbar {
+    background-color: #273340;
+}
+
+.gd-topbar .gd-topbar-tool .gd-topbar-tool-text {
+    color: #999;
+}
+
+.gd-topbar .gd-topbar-tool .gd-topbar-tool-icon {
+    color: #999;
+}
+
+.echars-box {
+    height: 45%;
+    background-color: #273340;
+}
+
+.echars-box .search-line {
+    height: 60px;
+}
+
+.echars-box .search-line .time-picker {
+    float: right;
+    margin: 13px 20px 0 0;
+}
+
+.echars-box .search-line .gd-select .gd-select-input .gd-input {
+    background-color: #232D39;
+    color: #fff;
+    border: 1px solid #3F4C59;
+}
+
+.echars-box .echars-common {
+    height: calc(100% - 60px);
+}
+
+/* 下面表格 */
+.table-box {
+    height: 55%;
+    padding: 0 20px;
+    width: calc(100% - 40px);
+}
+
+.none-pie {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* 导出功能弹窗 */
+.export-box {
+    height: calc(100% - 20px);
+    width: calc(100% - 80px);
+    padding: 0px 40px;
+}
+
+.export-box .line {
+    margin-top: 16px;
+}
+
+.export-box .line .gd-iconinput input,
+.gd-input {
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    width: 60px;
+}
+
+.export-box .line .color-help {
+    font-family: MicrosoftYaHei;
+    font-size: 14px;
+    color: #CCCCCC;
+    letter-spacing: 0;
+}
+
+.gd-layer .gd-layer-body .gd-layer-header {
+    border-bottom: 0;
+}
+
+.gd-layer .gd-layer-body .gd-layer-footer {
+    border-top: 0;
+}

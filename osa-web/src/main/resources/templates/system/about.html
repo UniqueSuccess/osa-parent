@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/about.css}" />
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+    <div id="app" class="gd-right-content" v-cloak>
+    <div class="about_content">
+        <div class="accredit_info">
+            <div class="title">
+                {{companyName}}
+            </div>
+            <div class="accredit_info_line">
+                <div class="accredit_info_name">授权有效期</div>
+                <div class="accredit_info_val">
+                    {{periodVlidity}}
+                </div>
+            </div>
+            <div class="accredit_info_line">
+                <div class="accredit_info_name">维保截止</div>
+                <div class="accredit_info_val">
+                    {{maintenanceCutOff}}
+                </div>
+            </div>
+            <div class="accredit_info_line">
+                <div class="accredit_info_name">授权数量</div>
+                <div class="accredit_info_val">
+                    {{authorizedNums}} 个
+                </div>
+            </div>
+            <div class="accredit_info_line">
+                <div class="accredit_info_name">授权码</div>
+                <div class="accredit_info_val">
+                    {{authorizationCode}}
+                </div>
+            </div>
+            <div class="accredit_info_line">
+                <div class="accredit_info_name">授权文件</div>
+                <div class="import_content">
+                    <form id="uploadForm" enctype="multipart/form-data" method="post">
+                        <div class="file-box">
+                            <input type="file" class="import_file" accept=".osa" id="import_file" name="file" @change="fileChange">
+                            <i class="icon-file import_file_icon"></i>
+                            <div class="value_text" id="value_text"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="gd-btn" @click="authClick" :disabled="isDisabled==1">授权</div>
+                <div class="gd-btn gd-btn-cancel" @click="exportFile">导出</div>
+            </div>
+        </div>
+        <div class="soft_info">
+            <div class="title logo_title">
+                <span>{{nameProject}}</span>
+            </div>
+            <div class="soft_info_line">
+                <div class="soft_info_name">系统全称</div>
+                <div class="soft_info_val">{{nameProject}} 运维安全审计系统</div>
+            </div>
+            <div class="soft_info_line">
+                <div class="soft_info_name">主程序版本</div>
+                <div class="soft_info_val">10.0</div>
+            </div>
+            <div class="soft_info_line">
+                <div class="soft_info_name">版本更新日期</div>
+                <div class="soft_info_val">2018年10月10日</div>
+            </div>
+        </div>
+    </div>
+    <div class="copyright">
+        <div class="copyright_content logo_web" title="Test股份有限公司">
+        </div>
+            <div class="copyright_content" title="Copyright © 2018 goldencis Inc. All rights reserved.">
+                Copyright © 2018 goldencis Inc. All rights reserved.
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/plugins/vue.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/about.js}"></script>
+</body>
+
+</html>

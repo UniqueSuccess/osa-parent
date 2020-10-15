@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/systemConfig.css}" />
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body>
+    <div th:replace="common/topLeft :: topleftbar"></div>
+
+    <div class="gd-right-content" id="contentDiv">
+        <div class="container containerWrapper">
+            <gd-tab style="height:100%;" @change="tabChange">
+                <gd-tab-item label="网络配置" v-if="allowSaveNetconfig">
+                    <form class="netset" id="eth_config">
+                        <div class="netset-every" v-cloak v-for="(item,index) in eth_info">
+                            <div class="netset-title">{{item.name}}</div>
+                            <div class="netset-con">
+                                <div class="row">
+                                    <label>IP地址</label>
+                                    <input type="text" gd-validate="ip" class="gd-input gd-input-lg" placeholder="0.0.0.0"
+                                        v-model="item.value.addr">
+                                </div>
+                                <div class="row">
+                                    <label>子网掩码</label>
+                                    <input type="text" gd-validate="netmask" name="netConfigs[index].mask" class="gd-input gd-input-lg"
+                                        placeholder="0.0.0.0" v-model="item.value.mask">
+                                </div>
+                                <div class="row">
+                                    <label>网关</label>
+                                    <input type="text" gd-validate="ip" name="netConfigs[index].gateway" class="gd-input gd-input-lg"
+                                        placeholder="0.0.0.0" v-model="item.value.gateway">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="save-config-box" >
+                        <button type="button" class="gd-btn" id="save_config" @click="saveNetsetConfig">保存</button>
+                    </div>
+                </gd-tab-item>
+                <gd-tab-item label="管控平台" v-cloak v-if="allowSavePlatform">
+                    <div class="platform-config" id="platform">
+                        <div class="pitem">
+                            <div class="pitem-title">密码限制</div>
+                            <div class="gd-padding-v-sm">
+                                <label class="pitem-label">密码组合</label>
+                                <label class="gd-checkbox"><input type="checkbox" v-model="security.number"><i></i>数字</label>
+                                <label class="gd-checkbox gd-margin-left-xxl"><input type="checkbox" v-model="security.capital"><i></i>大写字母</label>
+                                <label class="gd-checkbox gd-margin-left-xxl"><input type="checkbox" v-model="security.lowercase"><i></i>小写字母</label>
+                            </div>
+                            <div class="gd-padding-v-sm">
+                                <label class="pitem-label">最小长度</label>
+                                <div class="group-input">
+                                    <input type="text" class="gd-input" v-model="security.minLength" @input="validNumber($event)"
+                                        @change="validNumber($event)">
+                                    <span>位</span>
+                                </div>
+                            </div>
+                            <div class="gd-padding-v-sm">
+                                <label class="pitem-label">密码可尝试</label>
+                                <div class="group-input">
+                                    <input type="text" class="gd-input" v-model="security.tryCount" @input="validNumber($event)"
+                                        @change="validNumber($event)">
+                                    <span>次</span>
+                                </div>
+                            </div>
+                            <div class="gd-padding-v-sm">
+                                <label class="pitem-label">非法锁定</label>
+                                <div class="group-input">
+                                    <input type="text" class="gd-input" style="padding-right: 34px" v-model="security.lockDuration"
+                                        @input="validNumber($event)" @change="validNumber($event)">
+                                    <span>分钟</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pitem">
+                            <div class="pitem-title">审批配置</div>
+                            <div class="gd-padding-v-sm">
+                                <label class="pitem-label">审批时限</label>
+                                <gd-select placeholder="请选择" v-model="approval.expireTime" gd-validate="required">
+                                    <gd-option v-for="time in approvalExpireTime" :value="time.value">{{time.name}}</gd-option>
+                                </gd-select>
+                            </div>
+                            <div class="gd-padding-v-sm">
+                                <label class="pitem-label">自动审批结果</label>
+                                <label class="gd-radio" v-for="item,index in approvalExpireResult" :class="{'gd-margin-left-xl':index!==0}"><input
+                                        type="radio" :value="item.value" name="expireResult" v-model="approval.expireResult"><i></i>{{item.name}}</label>
+                            </div>
+                        </div>
+                        <div class="pitem">
+                            <div class="pitem-title">访问限制</div>
+                            <gd-tab style="height: 350px;">
+                                <gd-tab-item label="登录">
+                                    <div>
+                                        <div class="gd-margin-v-sm">用户名</div>
+                                        <gd-tag v-model="access.login.username"></gd-tag>
+                                        <div class="gd-margin-v-sm">来源IP/IP段</div>
+                                        <gd-tag v-model="access.login.ip" gd-validate="ipRanges"></gd-tag>
+                                    </div>
+                                </gd-tab-item>
+                                <gd-tab-item label="资源">
+                                    <div class="gd-margin-v-sm">来源IP/IP段</div>
+                                    <gd-tag v-model="access.resource.ip" gd-validate="ipRanges"></gd-tag>
+                                </gd-tab-item>
+                            </gd-tab>
+                        </div>
+                        <div class="pitem">
+                            <div class="pitem-title">安装包</div>
+                            <div class="gd-padding-v-sm j-filebox">
+                                <label class="pitem-label">插件</label>
+                                <div class="gd-iconinput gd-iconinput-lg">
+                                    <input type="text" class="j-uploadfile-name">
+                                    <i class="icon-folder" @click="selectPlatformFile($event)"></i>
+                                </div>
+                                <button class="gd-btn j-btn-upload" disabled type="button" @click="uploadPlatformFile($event)">上传</button>
+                                <form style="display:none" class="j-uploadfile-form">
+                                    <input type="file" name="packageFile" @change="selectPlatformFileDone($event)">
+                                    <input type="hidden" name="packageType" value="1">
+                                </form>
+                            </div>
+                            <div class="gd-padding-v-sm j-filebox">
+                                <label class="pitem-label">Windows XP</label>
+                                <div class="gd-iconinput gd-iconinput-lg">
+                                    <input type="text" class="j-uploadfile-name">
+                                    <i class="icon-folder" @click="selectPlatformFile($event)"></i>
+                                </div>
+                                <button class="gd-btn j-btn-upload" disabled type="button" @click="uploadPlatformFile($event)">上传</button>
+                                <form style="display:none" class="j-uploadfile-form">
+                                    <input type="file" name="packageFile" @change="selectPlatformFileDone($event)">
+                                    <input type="hidden" name="packageType" value="2">
+                                </form>
+                            </div>
+                            <div class="gd-padding-v-sm j-filebox">
+                                <label class="pitem-label">应用程序发布器</label>
+                                <div class="gd-iconinput gd-iconinput-lg">
+                                    <input type="text" class="j-uploadfile-name">
+                                    <i class="icon-folder" @click="selectPlatformFile($event)"></i>
+                                </div>
+                                <button class="gd-btn j-btn-upload" disabled type="button" @click="uploadPlatformFile($event)">上传</button>
+                                <form style="display:none" class="j-uploadfile-form">
+                                    <input type="file" name="packageFile" @change="selectPlatformFileDone($event)">
+                                    <input type="hidden" name="packageType" value="4">
+                                </form>
+                            </div>
+                        </div>
+                        <div class="pitem">
+                            <div class="pitem-title">升级包</div>
+                            <div class="gd-padding-v-sm j-filebox">
+                                <label class="pitem-label">插件</label>
+                                <div class="gd-iconinput gd-iconinput-lg">
+                                    <input type="text" class="j-uploadfile-name">
+                                    <i class="icon-folder" @click="selectPlatformFile($event)"></i>
+                                </div>
+                                <button class="gd-btn j-btn-upload" disabled type="button" @click="uploadPlatformFile($event)">上传</button>
+                                <form style="display:none" class="j-uploadfile-form">
+                                    <input type="file" name="packageFile" @change="selectPlatformFileDone($event)">
+                                    <input type="hidden" name="packageType" value="3">
+                                </form>
+                            </div>
+                            <div class="gd-padding-v-sm j-filebox">
+                                <label class="pitem-label">应用程序发布器</label>
+                                <div class="gd-iconinput gd-iconinput-lg">
+                                    <input type="text" class="j-uploadfile-name">
+                                    <i class="icon-folder" @click="selectPlatformFile($event)"></i>
+                                </div>
+                                <button class="gd-btn j-btn-upload" disabled type="button" @click="uploadPlatformFile($event)">上传</button>
+                                <form style="display:none" class="j-uploadfile-form">
+                                    <input type="file" name="packageFile" @change="selectPlatformFileDone($event)">
+                                    <input type="hidden" name="packageType" value="5">
+                                </form>
+                            </div>
+                        </div>
+                        <div class="pitem">
+                            <div class="pitem-title">个性化配置</div>
+                            <div class="gd-padding-v-sm">
+                                <label class="pitem-label">系统名称</label>
+                                <input type="text" class="gd-input gd-input-lg" v-model="custom.systemName" gd-validate="required">
+                            </div>
+                            <div class="gd-padding-v-sm j-filebox">
+                                <label class="pitem-label">登录背景</label>
+                                <div class="gd-iconinput gd-iconinput-lg">
+                                    <input type="text" class="j-uploadfile-name">
+                                    <i class="icon-folder" @click="selectPlatformFile($event)"></i>
+                                </div>
+                                <button class="gd-btn j-btn-upload" disabled type="button" @click="uploadBgImg($event)">上传</button>
+                                <button class="gd-btn" type="button" @click="bgImgRestore">还原</button>
+                                <form style="display:none" class="j-uploadfile-form">
+                                    <input type="file" name="file" accept="image/*" @change="selectPlatformFileDone($event)"
+                                        maxsize="10">
+                                </form>
+                                <div class="gd-margin-top-md" v-if="custom.background">
+                                    <label class="pitem-label"></label>
+                                    <img class="custom-img" :src="backgroundImg+'?t='+backgroundImgT">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="save-platform" v-if="allowSavePlatform">
+                        <button type="button" class="gd-btn" @click="savePlatform">保存</button>
+                    </div>
+                </gd-tab-item>
+                <gd-tab-item label="服务器" v-cloak class="server_config_box" v-if="allowSaveServer">
+                    <div class="server_config">
+                        <div class="device_load">
+                            <div class="name">
+                                设备负载
+                            </div>
+                            <div class="content">
+                                <div class="device_load_chart">
+                                    <canvas id="cpu_chart" width="200" height="160"></canvas>
+                                    <div class="chart_value" id="cpu_value">{{cpu_value}}%</div>
+                                    <div class="chart_name">CPU</div>
+                                </div>
+                                <div class="device_load_chart">
+                                    <canvas id="mysql_chart" width="200" height="160"></canvas>
+                                    <div class="chart_value" id="mysql_value">{{mysql_value}}%</div>
+                                    <div class="chart_name">MySQL</div>
+                                </div>
+                                <div class="device_load_chart">
+                                    <canvas id="memory_chart" width="200" height="160"></canvas>
+                                    <div class="chart_value" id="memory_value">{{memory_value}}%</div>
+                                    <div class="chart_name">内存</div>
+                                </div>
+                                <div class="device_load_chart">
+                                    <canvas id="disk_chart" width="200" height="160"></canvas>
+                                    <div class="chart_value" id="disk_value">{{disk_value}}%</div>
+                                    <div class="chart_name">硬盘</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="device_load">
+                            <div class="name">
+                                网口状态
+                            </div>
+                            <div class="content">
+                                <div class="server_eth_status" v-for="(item,index) in serverEthStatus">
+                                    <div class="server_eth_status_img_on" v-if="item.value=='1'"></div>
+                                    <div class="server_eth_status_img_off" v-if="item.value=='0'"></div>
+                                    <div class="server_eth_name">{{item.name}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="device_load server_system_config database_safeguard">
+                            <div class="name">
+                                第三方日志服务器
+                            </div>
+                            <div class="content" id="server_system_config">
+                                <form class="form_div" id="serverConfigForm">
+                                    <div class="row">
+                                        <label class="gd-label-required">名称</label>
+                                        <input type="text" name="name" v-model="logServerName" class="gd-input" value="第三方日志服务器"
+                                            gd-validate="required">
+                                    </div>
+                                    <div class="row">
+                                        <label class="gd-label-required">地址</label>
+                                        <input type="text" name="url" v-model="logServerUrl" placeholder="http://" class="gd-input" gd-validate="required url">
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                            <div class="device_load server_system_config database_safeguard">
+                                <div class="name">
+                                    第三方邮箱服务器
+                                </div>
+                                <div class="content" id="server_email_config">
+                                    <form class="form_div" id="serverEmailForm">
+                                        <div class="row">
+                                            <label class="gd-label-required">邮箱服务器</label>
+                                            <input type="text" name="serverAddress" placeholder="smtp.126.com" v-model="emailServerAddress" class="gd-input" gd-validate="required">
+                                        </div>
+                                        <div class="row">
+                                            <label class="gd-label-required">端口</label>
+                                            <input type="text" name="port"  v-model="emailServerPort" placeholder="" class="gd-input" gd-validate="required">
+                                        </div>
+                                        <div class="row">
+                                            <label class="gd-label-required">发送邮箱</label>
+                                            <input type="text" name="from"  placeholder="" v-model="emailServerSend" class="gd-input" gd-validate="required email">
+                                        </div>
+                                        <div class="row">
+                                            <label class="gd-label-required">发送邮箱密码</label>
+                                            <input type="text" name="password"  placeholder=""  v-model="emailServerPwd" class="gd-input" gd-validate="required">
+                                        </div>
+                                        <div class="row">
+                                            <label>接收邮箱</label>
+                                            <input type="text" class="gd-input" v-model="receiveEmail" placeholder="接收测试邮件" gd-validate="requiredRule email">
+                                            <span class="gd-btn gd-margin-left-sm gt-btn-send" @click="sendEmail">发送</span>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                    </div>
+                    <div class="save_server">
+                        <button class="gd-btn" @click="saveServer">保存</button>
+                    </div>
+                </gd-tab-item>
+                <gd-tab-item label="数据库"  v-cloak v-if="allowDb">
+                    <div style="height: 100%">
+                        <gd-toolbar :config="backUpToolbarConfig"></gd-toolbar>
+                        <div class="table-box">
+                            <gd-table :config="backUpTableConfig"></gd-table>
+                        </div>
+                    </div>
+                </gd-tab-item>
+
+                <gd-tab-item label="准入配置"  v-cloak  v-if="allowAccess">
+
+                    <form class="pitem" id="accessAllocationForm" v-cloak>
+                        <div class="gd-padding-v-sm">
+                            <label class="pitem-label">准入控制</label>
+                            <label class="gd-switch" >
+                                <input type="checkbox" v-model="accessAllocationInfo.status">
+                                <i></i>
+                            </label>
+                        </div>
+
+                        <div class="gd-padding-v-sm">
+                            <label class="pitem-label label-padding-xs">网关MAC地址</label>
+                            <input type="text" class="gd-input" gd-validate="mac" v-model="accessAllocationInfo.mac">
+                        </div>                    
+                        
+                        <div class="gd-padding-v-sm">
+                            <label class="pitem-label" style="float:left">准入控制IP段</label>
+                            <div class="pitem-content">
+                                <div class="gd-table-wrapper">
+                                    <gd-toolbar :config="admissionControlBar"></gd-toolbar>
+                                    <div class="gd-table-scroll-h">
+                                        <div class="gd-table-head">
+                                            <table>
+                                                <tr>
+                                                    <th width="10%" align="center"><label class="gd-checkbox"><input type="checkbox"><i></i></label></th>
+                                                    <th width="30%" align="left">IP段</th>
+                                                    <th width="50%" align="left">备注</th>
+                                                    <th width="10%" align="left">操作</th>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="gd-table-scroll-v">
+                                            <div class="gd-table-body">
+                                                <table>
+                                                    <tr v-for="(item,index) in accessAllocationInfo.ips">
+                                                        <td width="10%"><label class="gd-checkbox"><input type="checkbox" :data-index="index"><i></i></label></td>
+                                                        <td width="30%">{{item.ip}}</td>
+                                                        <td width="50%">{{item.remark}}</td>
+                                                        <td width="10%"><button type="button" class="gd-btn-alone icon-delete" @click="deleteIp(index)"></button></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="gd-padding-v-sm">
+                            <label class="pitem-label" style="float:left">端口控制</label>
+                            <div class="pitem-content ">
+                                <div class="gd-table-wrapper">
+                                    <gd-toolbar :config="portControlBar"></gd-toolbar>
+                                    <div class="gd-table-scroll-h">
+                                        <div class="gd-table-head">
+                                            <table>
+                                                <tr>
+                                                    <th width="10%" align="center"><label class="gd-checkbox"><input type="checkbox"><i></i></label></th>
+                                                    <th width="18%" align="left">开始端口</th>
+                                                    <th width="20%" align="left">结束端口</th>
+                                                    <th width="15%" align="left">操作</th>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="gd-table-scroll-v">
+                                            <div class="gd-table-body">
+                                                <table>
+                                                    <tr v-for="(item,index) in accessAllocationInfo.ports">
+                                                        <td width="10%"><label class="gd-checkbox"><input type="checkbox" :data-index="index" ><i></i></label></td>
+                                                        <td width="18%">{{item.start}}</td>
+                                                        <td width="20%">{{item.end}}</td>
+                                                        <td width="15%"><button type="button" class="gd-btn-alone icon-delete" @click="deletePort(index)"></button></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="save_server">
+                        <button class="gd-btn" @click="saveAccessAllocation">保存</button>
+                    </div>
+                </gd-tab-item>
+
+                <gd-tab-item label="USBKey配置"  v-cloak v-if="allowUsbkey">
+                    <div class="usbKey-con">
+                        <button id="downloadTool" type="button" class="btn-default" v-if="USBKeyInfo.ifUsbkeyDownload" @click="downloadTool">下载工具</button>
+                        <button id="startTool" class="btn-default gd-margin-left-sm" type="button" v-if="USBKeyInfo.ifUsbkeyStart" @click="startTool" >启动工具</button>
+                        <input type="text" class="usbKey-id gd-input gd-margin-left-sm" v-model="USBKeyInfo.ukeyId" placeholder="插入USBKey设备，检测生成标识" disabled="" readonly="">
+                        <button class="gd-margin-left-sm testing-a btn-testing" id="getKey" type="button" @click="getKey">检测</button>
+                        <input type="text" class="usbKey-id gd-input gd-margin-left-sm" id="usbkeyName" placeholder="USBKey名称" v-model="USBKeyInfo.usbkeyName"> 
+                        <button class="gd-margin-left-sm gd-btn-icon icon-add usbkey-add" type="button" id="usbkeyAdd" @click="addUsbkey"></button>
+                        <span id="authenticationError"></span>
+                    </div>
+                    <div class="table-box">
+                        <gd-table :config="usbkeyTableConfig"></gd-table>
+                    </div>
+                </gd-tab-item>
+
+            </gd-tab>
+        </div>
+    </div>
+
+    <!-- 自动备份 -->
+    <script type="text/html" id="auto_backup_box">
+		<div id="auto_backup">
+			<form class="auto_backup">
+			    <div class="auto_backup_line">
+			        <div class="auto_backup_line_title">
+			            自动备份
+			        </div>
+			        <div class="auto_backup_line_content">
+			            <label class="gd-switch" >
+			                <input type="checkbox" v-model="autoBackupInfo.status" @change="isAutoBackup(autoBackupInfo.status)">
+			                <i></i>
+			            </label>
+			        </div>
+			    </div>
+			    <div class="auto_backup_line" style="height: 64px">
+			        <div class="auto_backup_line_title gd-label-required">
+			            备份周期
+			        </div>
+			        <div class="auto_backup_line_content set_input_stat">
+			            <div class="week_or_month">
+			                <label class="gd-radio"  v-for="(item,index) in autoBackupCycleOption">
+			                    <input type="radio" :value="item.value" name="week_or_month" @change="backupCycleClick(autoBackupInfo.cycle)" v-model="autoBackupInfo.cycle">
+			                    <i></i>
+			                    {{item.name}}
+			                </label>
+			            </div>
+			            <div class="week_content" v-if="autoBackupInfo.cycle == 'week'">
+			                <label class="gd-radio" v-for="(item,index) in autoBackupWeek">
+			                    <input type="radio" :value="item.value" name="weekValue" v-model="autoBackupInfo.weekDay">
+			                    <i></i>
+			                    {{item.name}}
+			                </label>
+			            </div>
+			            <div class="month_content" v-if="autoBackupInfo.cycle == 'month'">
+			                <input id="autoBackupMonthDayInput" type="text" placeholder="1-28" gd-validate="valueRange required" gdv-minvalue="1" gdv-maxvalue="28" class="gd-input gd-input-lg" v-model="autoBackupInfo.monthDay">
+			                <span>日</span>
+			            </div>
+			        </div>
+			    </div>
+			    <div class="auto_backup_line">
+			        <div class="auto_backup_line_title gd-label-required">
+			            时间
+			        </div>
+			        <div class="auto_backup_line_content set_input_stat">
+			            <gd-timepicker :config="timePointPickerConfig"></gd-timepicker>
+			        </div>
+			    </div>
+			</form>
+		</div>
+	</script>
+
+    <!-- 实时备份 -->
+    <script type="text/html" id="addBackupConBox">
+        <div id="addBackupCon">
+            <form class="container">
+                <div class="row">
+                    <label class="gd-label-required">备份名称</label>
+                    <input type="text" class="gd-input" name="name" gd-validate="required maxLength" gdv-maxlength="100">
+                </div>
+                <div class="row">
+                    <label>备注</label>
+                    <input type="text" class="gd-input" name="mark" gd-validate="maxLength" gdv-maxlength="300">
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <!-- 数据库维护 -->
+    <script type="text/html" id="dbMaintenanceBox">
+        <div id="dbMaintenance">
+            <form class="container">
+                <div class="row">
+                    <label>日志保存期</label>
+                    <div class="logSaveDay">
+                        <input type="text" class="gd-input" v-model="dbMaintenanceDay" name="day" gd-validate="required int">
+                        <span>天</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <!-- 新增IP段 -->
+    <script type="text/html" id="addIpSegmentBox">
+        <div id="addIpSegmentCon">
+            <form class="container">
+                <div class="row">
+                    <label class="gd-label-required">开始IP</label>
+                    <input type="text" class="gd-input" name="startIp" gd-validate="required">
+                </div>
+                <div class="row">
+                    <label class="gd-label-required">结束IP</label>
+                    <input type="text" class="gd-input" name="endIp" gd-validate="required">
+                </div>
+                <div class="row">
+                    <label>备注</label>
+                    <textarea class="gd-textarea" name="remark" gd-validate="maxLength" gdv-maxlength="200"></textarea>
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <!-- 新增端口 -->
+    <script type="text/html" id="addPortBox">
+        <div id="addPortCon">
+            <form class="container">
+                <div class="row">
+                    <label class="gd-label-required">开始端口</label>
+                    <input type="text" class="gd-input" name="startPort" gd-validate="required port">
+                </div>
+                <div class="row">
+                    <label class="gd-label-required">结束端口</label>
+                    <input type="text" class="gd-input" name="endPort" gd-validate="required port">
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/plugins/donut-chart.min.js}"></script>
+    <script th:src="@{/js/encrypt.js}"></script>
+    <script th:src="@{/js/sha256.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/systemConfig.js}"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.core.mapper.UserRoleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.core.entity.UserRole">
+        <id column="user_guid" property="userGuid" />
+        <result column="role_guid" property="roleGuid" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        user_guid, role_guid
+    </sql>
+
+    <!-- 根据用户id删除用户、角色关联表记录 -->
+    <delete  id="deleteUserRoleByUserGuid" parameterType="String" >
+        delete from t_user_role
+        where  user_guid=#{userGuid}
+    </delete>
+
+    <select id="findAdminRoleRelationByUsername" resultType="com.goldencis.osa.core.entity.UserRole">
+        SELECT r.user_guid, r.role_guid
+        FROM t_user_role r
+        LEFT JOIN t_user u ON r.user_guid = u.guid
+        WHERE u.username = #{value} AND r.role_guid = 1
+    </select>
+
+    <select id="findNormalRoleRelationByUsername" resultType="com.goldencis.osa.core.entity.UserRole">
+        SELECT r.user_guid, r.role_guid
+        FROM t_user_role r
+        LEFT JOIN t_user u ON r.user_guid = u.guid
+        WHERE u.username = #{value} AND r.role_guid = 4
+    </select>
+
+    <!-- 添加用户、角色关联记录 -->
+    <insert id="saveUserRole" parameterType="com.goldencis.osa.core.entity.UserRole">
+        insert into t_user_role (<include refid="Base_Column_List"></include> )
+        value(#{userGuid}, #{roleGuid})
+    </insert>
+</mapper>

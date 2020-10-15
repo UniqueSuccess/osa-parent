@@ -1,0 +1,88 @@
+# 以#开头的每行信息作为注释,都将被忽略掉
+# 如不特殊说明,默认严格区分大小写
+# ###################################
+# 命令介绍:
+# 命令格式为:操作符=参数; 例如:执行等待的命令为sleep=500;表示等待500毫秒
+# 命令以行为单位,单条命令不允许换行
+# 命令中不允许出现分号(;)
+
+# ###################################
+# 下面是'数据库类型'发布规则示例
+# ###################################
+
+# 工具类型(必须)
+toolType=MySQL
+
+# 规则名称(必须)
+ruleName=这里是规则名称
+
+# 执行应用程序
+exec=D:\\Program Files (x86)\\PremiumSoft\\Navicat Premium 12\\navicat.exe
+
+# 定位窗口,格式为(class:窗口类名,name:窗口名)
+waitWindow=class:TNavicatMainForm,name:Navicat Premium
+
+# 等待(单位毫秒,只能传入正整数)
+sleep=500
+
+# 鼠标左键点击(坐标值:x,y)
+mouseLClick=31,47
+
+sleep=500
+mouseLClick=85,90
+sleep=500
+mouseLClick=279,98
+
+# 定位窗口,格式为:(class:窗口类名,name:窗口名),name值可以为空
+waitWindow=class:TConnectionForm,name:MySQL - 新建连接
+
+# 编辑框输入,格式为(x坐标,y坐标,输入的数据)
+editInput=307,160,${rand}
+
+sleep=500
+# 编辑框输入,格式为(x坐标,y坐标,输入的数据),在执行单点登录时,${ip}会被替换为设备ip
+editInput=295,215,${ip}
+# ${port} 会被替换为端口
+editInput=224,241,${port}
+# ${account} 会被替换为账号
+editInput=252,267,${account}
+# ${pwd} 会被替换为密码
+editInput=239,292,${pwd}
+mouseLClick=439,644
+
+# ###################################
+# 操作符介绍:
+#     toolType: 工具类型(必选),可选的工具类型详见`可选的工具类型`
+#     ruleName: 规则名称(必需),不能为空,且不能与当前发布器中已部署的发布规则重名
+#     exec: 需要执行的应用程序路径,参数为程序路径,可以携带启动参数
+#     waitWindow: 定位窗口,参数格式为:(class:窗口类名,name:窗口名),name值可以为空
+#     sleep: 等待时间,参数为正整数,单位毫秒值;等待命令是可选的,一般使用这个命令来等待程序响应
+#     mouseLClick: 鼠标左键点击,参数为:(坐标值:x,y)
+#     mouseRClick: 鼠标右键点击,参数格式与`mouseLClick`相同
+#     editInput: 编辑框输入,参数格式为(x坐标,y坐标,输入的数据),待输入的数据中可以引用`占位符`
+# ###################################
+# 可选的工具类型:
+#     Oracle
+#     DB2
+#     Informix
+#     SQL Server 2008
+#     SQL Server 2005
+#     SQL Server 2000
+#     Sybase
+#     MySQL
+# ###################################
+# 占位符介绍:
+#     通用:
+#         设备IP: ${ip}
+#         账号: ${account}
+#         密码: ${pwd}
+#         随机字符串: ${rand}
+#     数据库设备:
+#         数据库名: ${dbName}
+#         端口: ${port}
+#     C/S设备:
+#         暂无
+#     B/S设备:
+#         登录URL: ${url}
+#     网络设备:
+#         暂无

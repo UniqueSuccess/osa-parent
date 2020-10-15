@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.approval.mapper.ApprovalFlowInfoCommandMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.approval.entity.ApprovalFlowInfoCommand">
+        <id column="id" property="id" />
+        <result column="flow_id" property="flowId" />
+        <result column="terminal_command_id" property="terminalCommandId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, flow_id, terminal_command_id
+    </sql>
+
+    <!-- 获取命令 -->
+    <select id="getCommandContentInFlowCommand" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT tc.input FROM t_approval_flow_info_command fc
+        LEFT JOIN t_terminal_command tc ON tc.id = fc.terminal_command_id
+        WHERE fc.flow_id = #{value }
+    </select>
+
+    <!-- 通过命令审批id  获取 审批用户、设备信息 -->
+    <select id="getApprovalFlowInfoCommandByFlowId" parameterType="java.lang.String" resultType="com.goldencis.osa.approval.entity.ApprovalFlowInfoCommand">
+        SELECT
+          fc.id,
+          fc.flow_id AS flowId,
+          fc.terminal_command_id AS terminalCommandId,
+          tc.input AS terminalCommandContent,
+          f.applicant_id AS applicantId,
+          f.applicant_username AS applicantUsername,
+          f.applicant_name AS applicantName,
+          f.apply_time AS applyTime,
+          u.guid AS userId,
+          u.username AS userUsername,
+          u.name AS userName,
+          GROUP_CONCAT(ug.id SEPARATOR ',') AS usergroupIds,
+          GROUP_CONCAT(ug.name SEPARATOR ',') AS usergroupNames,
+          ag.id AS assetgroupId,
+          ag.name AS assetgroupName,
+          a.id AS assetId,
+          a.ip AS assetIp,
+          a.name AS assetName,
+          atp.name AS assettypeName,
+          atp.id AS assettypeId,
+          ts.system_user AS assetAccountName,
+          ts.remote_addr AS userRemoteIp
+        FROM t_approval_flow_info_command fc
+        LEFT JOIN t_approval_flow f ON f.id = fc.flow_id
+        LEFT JOIN t_terminal_command tc ON tc.id = fc.terminal_command_id
+        LEFT JOIN t_terminal_session ts ON ts.id = tc.session
+        LEFT JOIN t_asset a ON a.id = ts.asset_id
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        LEFT JOIN t_asset_type atp ON atp.id = a.type
+        LEFT JOIN t_user u ON u.guid = ts.user_guid
+        LEFT JOIN t_user_usergroup uug ON uug.user_guid = ts.user_guid
+        LEFT JOIN t_usergroup ug ON ug.id = uug.usergroup_id
+        WHERE fc.flow_id = #{value }
+    </select>
+
+
+
+
+</mapper>

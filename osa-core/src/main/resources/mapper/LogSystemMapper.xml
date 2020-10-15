@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.core.mapper.LogSystemMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.core.entity.LogSystem">
+        <id column="log_id" property="logId" />
+        <result column="time" property="time" />
+        <result column="ip" property="ip" />
+        <result column="user_id" property="userId" />
+        <result column="user_username" property="userUsername" />
+        <result column="user_name" property="userName" />
+        <result column="asset_id" property="assetId" />
+        <result column="asset_name" property="assetName" />
+        <result column="asset_ip" property="assetIp" />
+        <result column="log_type" property="logType" />
+        <result column="log_page" property="logPage" />
+        <result column="log_operate_param" property="logOperateParam" />
+        <result column="log_desc" property="logDesc" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        log_id, time, ip, user_id, user_username, user_name, log_type, asset_id, asset_name, asset_ip, log_page, log_operate_param, log_desc
+    </sql>
+
+    <!-- 获取系统日志数量 -->
+    <select id="countLogSystemInPage" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM t_log_system s
+        <where>
+            <if test="logBigTypeLists != null and logBigTypeLists.size()>0 ">
+                AND s.log_type IN
+                <foreach collection="logBigTypeLists" open="(" separator="," close=")" item="logBigTypeItem">
+                    #{logBigTypeItem}
+                </foreach>
+            </if>
+            <if test="searchStr != null">
+                AND ( s.ip LIKE #{searchStr} OR s.user_username LIKE #{searchStr} OR s.user_name LIKE #{searchStr}
+                OR s.log_desc LIKE #{searchStr} OR s.log_page LIKE #{searchStr} OR s.log_operate_param LIKE #{searchStr})
+            </if>
+            <if test="logSmallTypeLists != null and logSmallTypeLists.size()>0 ">
+                AND s.log_type IN
+                <foreach collection="logSmallTypeLists" open="(" separator="," close=")" item="logSmallTypeItem">
+                    #{logSmallTypeItem}
+                </foreach>
+            </if>
+            <if test="startTime != null">
+                AND s.time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND s.time &lt; #{endTime}
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 获取系统日志 -->
+    <select id="getLogSystemInPage" parameterType="java.util.Map" resultType="com.goldencis.osa.core.entity.LogSystem">
+        SELECT <include refid="Base_Column_List"></include>
+        FROM t_log_system s
+        <where>
+            <if test="logBigTypeLists != null and logBigTypeLists.size()>0 ">
+                AND s.log_type IN
+                <foreach collection="logBigTypeLists" open="(" separator="," close=")" item="logBigTypeItem">
+                    #{logBigTypeItem}
+                </foreach>
+            </if>
+            <if test="searchStr != null">
+                AND ( s.ip LIKE #{searchStr} OR s.user_username LIKE #{searchStr} OR s.user_name LIKE #{searchStr}
+                OR s.log_desc LIKE #{searchStr} OR s.log_page LIKE #{searchStr} OR s.log_operate_param LIKE #{searchStr})
+            </if>
+            <if test="logSmallTypeLists != null and logSmallTypeLists.size()>0 ">
+                AND s.log_type IN
+                <foreach collection="logSmallTypeLists" open="(" separator="," close=")" item="logSmallTypeItem">
+                    #{logSmallTypeItem}
+                </foreach>
+            </if>
+            <if test="startTime != null">
+                AND s.time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND s.time &lt; #{endTime}
+            </if>
+        </where>
+        <if test="orderType == 'desc'">
+            ORDER BY s.time DESC
+        </if>
+        <if test="orderType == 'asc'">
+            ORDER BY s.time ASC
+        </if>
+        limit #{start} , #{length}
+    </select>
+
+    <!-- 获取系统日志 （活跃账号前5名）-->
+    <select id="getLoginTimesTop5" parameterType="java.util.Map" resultType="com.goldencis.osa.core.entity.LogSystem">
+        SELECT  COUNT(1) AS loginTimes ,user_username,user_name,log_id
+        FROM t_log_system s
+        LEFT JOIN t_user_role r ON r.user_guid = s.user_id
+        <where>
+            <if test="loginType != null">
+                AND  s.log_type = #{loginType}
+            </if>
+            AND  DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= DATE(TIME)
+            AND r. role_guid = '4'
+        </where>
+        GROUP BY user_username
+        ORDER BY logintimes DESC
+        LIMIT 5
+    </select>
+
+    <!-- 获取运维日志 -->
+    <select id="getLoginOperationTop" parameterType="java.util.Map" resultType="com.goldencis.osa.core.entity.LogSystem">
+        SELECT  log_id,user_username,user_name, asset_id, asset_name, asset_ip,time
+        FROM t_log_system s
+        <where>
+            <if test="loginType != null">
+                AND  s.log_type = #{loginType}
+            </if>
+            AND  DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= DATE(TIME)
+            AND s.asset_id IS NOT NULL
+        </where>
+        ORDER BY log_id DESC
+        LIMIT 20
+    </select>
+
+    <!-- 获取资源运维TOP5-->
+    <select id="getAssetOperationsTop5" parameterType="java.util.Map" resultType="com.goldencis.osa.core.entity.LogSystem">
+        SELECT
+            COUNT(1) AS assetOperations,
+            log_id,
+            user_username,
+            user_name,
+            asset_id,
+            asset_name,
+            asset_ip,
+            TIME
+        FROM
+        t_log_system s
+        <where>
+            <if test="loginType != null">
+                AND  s.log_type = #{loginType}
+            </if>
+            AND  DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= DATE(TIME)
+            AND s.asset_id IS NOT NULL
+        </where>
+        GROUP BY asset_id
+        ORDER BY assetOperations DESC
+        LIMIT 5
+    </select>
+
+    <delete id="logClean">
+        DELETE FROM `t_log_system` WHERE time &lt; #{date}
+    </delete>
+
+    <!-- 获取用户总数 -->
+    <select id="getUserNums"  resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM t_user u
+        LEFT JOIN t_user_role ur ON ur.user_guid = u.guid
+        WHERE ur.role_guid ='4'
+    </select>
+
+    <!-- 获取设备总数 -->
+    <select id="getAssetNums"  resultType="java.lang.Integer">
+      SELECT COUNT(1) FROM t_asset
+    </select>
+
+    <!-- 在线会话数量 -->
+    <select id="getSessionOnlineNums"  resultType="java.lang.Integer">
+      SELECT COUNT(1) FROM t_terminal_session WHERE is_finished = 0
+    </select>
+
+    <!-- 已审批 数量 -->
+    <select id="getApprovedNums"  resultType="java.lang.Integer">
+      SELECT COUNT(1) FROM t_approval_flow WHERE STATUS != 0
+    </select>
+
+    <!-- 待审批 数量 -->
+    <select id="getUnApprovedNums"  resultType="java.lang.Integer">
+      SELECT COUNT(1) FROM t_approval_flow WHERE STATUS = 0
+    </select>
+
+</mapper>

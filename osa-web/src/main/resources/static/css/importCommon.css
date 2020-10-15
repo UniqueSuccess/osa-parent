@@ -1,0 +1,86 @@
+/* 导入新加 fq*/
+#importUser {
+    padding: 20px 40px;
+    width: calc(100% - 80px);
+    height: calc(100% - 40px);
+}
+
+#importUser #uploadForm {
+    height: 100%;
+}
+
+#importUser #uploadForm>div {
+    min-height: 30px;
+    margin-top: 16px;
+}
+
+#importUser #uploadForm>div span {
+    display: inline-block;
+}
+
+#importUser #uploadForm>div span:nth-child(1) {
+    width: 60px;
+    text-align: right;
+    margin-right: 12px;
+    position: relative;
+}
+
+.label-readio {
+    display: inline-block;
+}
+
+.label-readio label.gd-radio {
+    display: block;
+    margin-bottom: 18px;
+}
+.label-readio label.gd-radio:last-child{
+    margin-bottom: 0px;
+}
+
+#uploadForm {
+    overflow: hidden
+}
+
+#incCopyFile {
+    overflow: hidden;
+    width: 438px;
+}
+
+.import-input {
+    float: left;
+    position: relative
+}
+
+.upload-file {
+    display: inline-block;
+}
+
+.btn-file {
+    position: relative;
+    left: -30px;
+    z-index: 8;
+    cursor: pointer;
+    color: #6785CF;
+    font-size: 18px;
+    top: 2px;
+}
+
+.import-file {
+    position: absolute;
+    right: 25px;
+    top: 0;
+    opacity: 0;
+    width: 38px;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 23px;
+}
+
+span.help-title {
+    position: absolute;
+    font-family: MicrosoftYaHei;
+    font-size: 14px;
+    color: #CCCCCC;
+    letter-spacing: 0;
+    margin-left: 10px;
+}

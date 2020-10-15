@@ -1,0 +1,453 @@
+.containerWrapper {
+    height: calc(~"100% - 40px")
+}
+
+[v-cloak] {
+  display: none;
+}
+
+.netset {
+    .netset-every {
+        width: 562px;
+        margin: 5px 15px 30px 15px;
+        float: left;
+        background: #f5f5f5;
+        .netset-title {
+            background: #e6e6e6;
+            padding-left: 15px;
+            height: 40px;
+            line-height: 40px;
+            font-weight: bold
+        }
+        .netset-con {
+            padding: 20px 0;
+            overflow: hidden;
+        }
+    }
+}
+
+
+.table-box {
+    height: calc(~"100% - 56px")
+}
+
+//备份
+.logSaveDay{
+    position:relative;
+    float:left;
+    span{
+        position:absolute;
+        right:10px;
+    }
+}
+
+.auto_backup {
+    padding: 20px
+}
+
+.auto_backup_line {
+    height: 32px;
+    margin-bottom: 12px;
+}
+
+.auto_backup_line_title {
+    width: 96px;
+    text-align: right;
+    line-height: 32px;
+    float: left;
+    margin-right: 16px;
+}
+
+.auto_backup_line_content {
+    float: left;
+    line-height: 32px;
+}
+
+.week_or_month {
+    margin-bottom: 6px;
+}
+
+.week_or_month label {
+    width: 55px;
+    margin-right: 30px;
+    line-height: 32px;
+}
+
+.week_or_month label i {
+    margin-top: 8px;
+}
+
+.week_content label {
+    width: 55px;
+    margin-right: 30px;
+    line-height: 32px;
+}
+
+.week_content label i {
+    margin-top: 8px;
+}
+
+.month_content {
+    position: relative;
+    width: 380px;
+}
+
+.month_content input {
+    padding-right: 30px;
+}
+
+.month_content span {
+    position: absolute;
+    top: 0;
+    right: 10px;
+}
+
+.gd-timepicker {
+    width: 380px;
+    position: relative;
+}
+
+.gd-timepicker .gd-timeruler {
+    position: absolute !important;
+    left: 0 !important;
+    top: 37px !important;
+}
+
+//服务器
+.server_config,
+.netset,
+.platform-config {
+    margin-left: 20px;
+    margin-top: 20px;
+    height: calc(~"100% - 65px");
+    overflow-y: auto;
+}
+
+.device_load {
+    margin-bottom: 55px;
+}
+
+.device_load .content {
+    overflow: hidden;
+}
+
+.device_load_chart {
+    float: left;
+    margin-right: 10px;
+    text-align: center;
+    position: relative;
+}
+
+.chart_value {
+    width: 100%;
+    position: absolute;
+    left: 0;
+    bottom: 72px;
+    font-size: 18px;
+    font-family: Arial;
+    font-weight: bold;
+    text-align: center;
+}
+
+.chart_name {
+    width: 100%;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    text-align: center;
+}
+
+.server_eth_status {
+    margin-top: 40px;
+    margin-left: 20px;
+    margin-right: 120px;
+    width: 60px;
+    float: left;
+}
+
+.server_eth_status_img_on {
+    width: 60px;
+    height: 57px;
+    background: url("../images/eth_active.png");
+}
+
+.server_eth_status_img_off {
+    width: 60px;
+    height: 57px;
+    background: url("../images/eth_unactive.png");
+}
+
+.server_eth_name {
+    text-align: center;
+    margin-top: 28px;
+}
+
+.server_system_config .form_div {
+    margin-left: 20px;
+    margin-top: 30px;
+}
+
+.server_system_config .label_name {
+    margin-right: 16px;
+}
+
+.restart_server {
+    height: 32px;
+}
+
+.restart_server .name {
+    float: left;
+}
+
+.restart_server .gd-btn-danger {
+    margin-left: 16px;
+    margin-top: -6px;
+}
+
+.gd-table-footer {
+    background: none !important;
+}
+
+.gd-tab-item .gd-toolbar{
+    padding:0 15px
+}
+
+.database_safeguard .gd-label-required:before {
+    left: 0 !important;
+}
+
+.database_safeguard .form_div_line {
+    margin-bottom: 12px;
+}
+
+.database_safeguard .form_div_line input {
+    width: 50px !important;
+    margin-left: 15px;
+    margin-right: 10px;
+}
+
+.server_config_box {
+    position: relative;
+    padding-right: 0 !important;
+}
+
+.save_server,
+.save-config-box,
+.save-platform {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 64px;
+    width: 100%;
+}
+
+.save_server button,
+.save-config-box button,
+.save-platform button {
+    margin-left: 36px;
+    margin-top: 16px;
+}
+
+.pitem {
+    padding: 20px;
+    .pitem-title {
+        margin-bottom: 15px;
+    }
+    .pitem-label {
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 10px;
+        width: 120px;
+        text-align: right;
+    }
+    .group-input {
+        width: 110px;
+        display: inline-block;
+        vertical-align: middle;
+        position: relative;
+        .gd-input {
+            width: 100%;
+            padding-right: 24px;
+            box-sizing: border-box;
+            line-height: 32px;
+        }
+        span {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    }
+    .gd-tag-group {
+        width: 100%;
+    }
+    .custom-img {
+        max-width: 200px;
+        max-height: 200px;
+        border: 1px solid #e1e1e1;
+        padding: 5px;
+        border-radius: 2px;
+        display: inline-block;
+    }
+}
+.gt-btn-send{
+    background:#f2f2f2;
+    color:#666
+}
+
+.pitem {
+    padding: 15px 20px 80px 20px;
+    overflow-y:auto;
+    .gd-table-wrapper .gd-table-scroll-h{
+        height: calc(~"100% - 43px")
+    }
+}
+.gd-radio input[type='text']{
+    display:inline-block;
+}
+
+.pitem .pitem-title {
+    margin-bottom: 15px
+}
+
+.pitem .gd-padding-v-sm{
+    &:after{
+        content:'';
+        display:block;
+        clear:both;
+    }
+}
+
+.pitem .label-padding-xs{
+    padding-top:7px;
+}
+
+.pitem .pitem-label {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 20px;
+    width: 120px;
+    text-align: right;
+}
+
+.pitem .group-input {
+    width: 110px;
+    display: inline-block;
+    vertical-align: middle;
+    position: relative
+}
+
+.pitem .group-input .gd-input {
+    width: 100%;
+    padding-right: 24px;
+    box-sizing: border-box;
+    line-height: 32px
+}
+
+.pitem .group-input span {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%)
+}
+
+.gd-table-wrapper .gd-table-body table tr:nth-child(odd) {
+    background-color: #fff
+}
+.gd-table-wrapper .gd-table-body table tr:nth-child(even) {
+    background-color: #f7f7f9
+}
+
+.pitem-content{
+    float:left;
+    border:1px solid #eee;
+    width:1000px;
+    height:260px;
+    .gd-toolbar {
+        height:43px;
+        line-height:43px;
+        padding-left:10px;
+        background:#fff
+    }
+
+}
+
+
+.usbKey-con {
+    height: 50px
+}
+
+.usbKey-con .btn-default {
+    float: left;
+    border: none;
+    outline: 0;
+    width: 70px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    background-color: #ddd;
+    border-radius: 1px;
+    color:#555
+}
+
+.usbKey-con .btn-default:focus,.usbKey-con .btn-default:hover {
+    background-color: #5475c9!important;
+    color: #fff
+}
+
+.usbKey-con .btn-testing {
+    width: 70px;
+    height: 32px;
+    background-color: #ddd;
+    color: #555;
+    border: 0;
+    outline: 0;
+    border-radius: 1px;
+    float: left
+}
+
+.usbKey-con .btn-testing:hover {
+    background-color: #5475c9;
+    color: #fff
+}
+
+.usbKey-con .usbKey-id {
+    width: 320px;
+    padding-left: 10px;
+    float: left
+}
+
+.usbKey-con .usbkey-add {
+    color: #666;
+    width: 30px;
+    background: #eaeaea;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 2px;
+    border: 0
+}
+
+.usbKey-con .usbkey-add:hover {
+    background-color: #29b6f6;
+    color: #fff
+}
+
+.usbKey-con .btn-default[disabled] {
+    background-color: #f2f2f2!important
+}
+
+.usbkey-table-box {
+    position: relative;
+    height: calc(100% - 72px)
+}
+
+
+#addIpSegmentCon .gd-textarea{
+    width:280px;  
+}
+
+#authenticationError .error{
+    color:#f00;
+    margin-left:5px;
+}

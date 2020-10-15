@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.core.mapper.OperationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.core.entity.Operation">
+        <id column="id" property="id" />
+        <result column="compositor" property="compositor" />
+        <result column="code" property="code" />
+        <result column="url_partten" property="urlPartten" />
+        <result column="method" property="method" />
+        <result column="description" property="description" />
+        <result column="parent_id" property="parentId" />
+        <result column="visible" property="visible" />
+        <result column="grant_visible" property="grantVisible" />
+        <result column="navigation_id" property="navigationId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, compositor, code, url_partten, method, description, parent_id, visible, grant_visible, navigation_id
+    </sql>
+
+</mapper>

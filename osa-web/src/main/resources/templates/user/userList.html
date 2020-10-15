@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <script src="/js/resource.js"></script> -->
+    <!-- <link rel="stylesheet" href="/css/table.css"> -->
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/user.css}" />
+    <link rel="stylesheet" th:href="@{/css/importCommon.css}" />
+    <!-- <link rel="stylesheet" th:href="@{/css/gd_common.css}" /> -->
+
+    <script th:src="@{/js/jquery.min.js}"></script>
+
+</head>
+
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+
+    <div class="gd-right-content" id="contentDiv">
+        <div class="contentL" id="departmentBox">
+            <gd-tree :config='treeConfig' class="gd-tree-gray" id="usergroupTree"></gd-tree>
+        </div>
+        <div class="contentR">
+            <div class="userlistBox">
+                <gd-toolbar :config="toolbarConfig"></gd-toolbar>
+                <div class="table-box">
+                    <gd-table :config="tableConfig"></gd-table>
+                </div>
+            </div>
+        </div>
+        <div id="addUserBox" style="display:none">
+            <form id="userForm" class="container">
+                <div class="row" id="userNameBox">
+                    <label class="gd-label-required">用户名</label>
+                    <input type="text" class="gd-input" name="username" gd-validate="required normalChar maxLength"
+                        gdv-maxlength="30" v-model="user_info.username">
+                </div>
+                <div class="row">
+                    <label>初始密码</label>
+                    <!-- 普通开关 -->
+                    <label class="gd-switch">
+                        <input type="checkbox" name="defaultPassword" v-model="user_info.pwStatus" checked @change="pwStatusChange">
+                        <i></i>
+                    </label>
+                </div>
+                <div class="row">
+                    <label class="gd-label-required">密码</label>
+                    <input id="pwUser" type="password" name="password" v-model="user_info.password" :gdv-minlength="pwLength"
+                        class="gd-input" gd-validate="passwordRule minLength maxLength hasNumber hasLowerCase hasCapital"
+                        gdv-maxlength="30" disabled @keyup='pwKeyupValidate'>
+                </div>
+                <div class="row" style="padding:0">
+                    <label></label>
+                    <div id="level" class="pw-strength"><span class="pw-bar"></span><span class="pw-bar-on"></span></div>
+                </div>
+                <div class="row">
+                    <label class="gd-label-required">确认密码</label>
+                    <input id="equalPwUser" type="password" class="gd-input" v-model="user_info.confirm_password"
+                        gd-validate="passwordRule equalTo" gdv-equal="pwUser" disabled>
+                </div>
+                <div class="row">
+                    <label>认证方式</label>
+                    <gd-select placeholder="" name="authenticationMethod" v-model="user_info.authenticationMethod" @change="authenticationChange">
+                        <gd-option value="1">密码</gd-option>
+                        <!-- <gd-option value="2">密码+短信平台</gd-option> -->
+                        <gd-option value="3">密码+第三方USBKEY</gd-option>
+                    </gd-select>
+                </div>
+                <div class="row" v-if="user_info.authenticationMethod == 3">
+                    <label>USBKey绑定</label>
+                    <gd-select placeholder="" name="ukeyId"  v-model="user_info.ukeyId">
+                        <gd-option :value="item.value" v-for="item,index in dataukeyIdArr">
+                            {{item.name}}
+                        </gd-option>
+                    </gd-select>
+                </div>
+                <div class="row">
+                    <label class="gd-label-required">姓名</label>
+                    <input type="text" class="gd-input" name="name" v-model="user_info.name" gd-validate="exceptSpecialChar required maxLength"
+                        gdv-maxlength="45" gdv-minlength="2">
+                </div>
+
+                <div class="row">
+                    <label class="gd-label-required">用户组</label>
+                    <gd-select placeholder="请选择" name="usergroupIds" gd-validate="required" v-model="usergroups">
+                        <gd-tree :config='treeWindowConfig' class="gd-tree-gray"></gd-tree>
+                    </gd-select>
+                </div>
+                <div class="row">
+                    <label>用户策略</label>
+                    <gd-select placeholder="请选择" name="strategy" v-model="user_info.userStrategy">
+                        <gd-option :value="item.value" v-for="item,index in dataBaseList">
+                            {{item.name}}
+                        </gd-option>
+                    </gd-select>
+                </div>
+
+                <div class="row">
+                    <label>状态</label>
+                    <div class="statusSelect">
+                        <label class="gd-radio">
+                            <input type="radio" value="11" name="status" checked v-model="user_info.status">
+                            <i></i>正常
+                        </label>
+                        <label class="gd-radio">
+                            <input type="radio" value="10" name="status" v-model="user_info.status">
+                            <i></i>锁定
+                        </label>
+                        <label class="gd-radio">
+                            <input type="radio" value="12" name="status" v-model="user_info.status">
+                            <i></i>停用
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <label>电话</label>
+                    <input type="text" class="gd-input" name="phone" v-model="user_info.phone" gd-validate="phone">
+                </div>
+                <div class="row">
+                    <label>邮箱</label>
+                    <input type="text" class="gd-input" name="email" v-model="user_info.email" gd-validate="email maxLength" gdv-maxlength="50">
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/html" id="authorizedAssetBox">
+        <div id="authorizedBox">
+            <gd-tab style="height: 521px; margin-top:20px">
+                <gd-tab-item label="设备">
+                    <div class="tableContent">
+                        <gd-toolbar :config="toolbarAssetConfig"></gd-toolbar>
+                        <div class="table-box">
+                            <gd-table :config="tableAssetConfig"></gd-table>
+                        </div>
+                    </div>
+                </gd-tab-item>
+                <gd-tab-item label="设备组">
+                    <div class="tableContent">
+                        <gd-toolbar :config="toolbarAssetGroupConfig"></gd-toolbar>
+                        <div class="table-box">
+                            <gd-table :config="tableAssetGroupConfig"></gd-table>
+                        </div>
+                    </div>
+                </gd-tab-item>
+            </gd-tab>
+        </div>
+    </script>
+
+    <!-- 添加授权设备 -->
+    <script type="text/html" id="authorizedAssetAddBox">
+        <div id="authorizedAssetAdd" class="container">
+            <div class="nonSelect-asset">
+                <div class="asset-select-title">未选设备</div>
+                <gd-tree :config='treeAuthConfig'></gd-tree>
+            </div>
+            <div class="select-asset">
+                <div class="asset-select-title">已选设备({{assetAuthListLen}})</div>
+                <ul>
+                    <li v-for="item,index in assetAccountList" :title="item.accountName"><i class="icon icon-monitor"></i>{{item.assetName}}_{{item.accountName}}</li>
+                </ul>
+            </div>
+        </div>
+    </script>
+
+    <!-- 添加授权设备组 -->
+    <script type="text/html" id="authorizedGroupAddBox">
+        <div id="authorizedGroupAdd" class="container">
+            <div class="nonSelect-asset">
+                <div class="asset-select-title">未选设备组</div>
+                <gd-tree :config='treeAuthGroupConfig'></gd-tree>
+            </div>
+            <div class="select-asset">
+                <div class="asset-select-title">已选设备组({{assetGroupAuthListLen}})</div>
+                <ul>
+                    <li v-for="item,index in assetGroupAuthList" :title="item.accountName"><i class="icon icon-file"></i>{{item.assetGroupName}}</li>
+                </ul>
+            </div>
+        </div>
+    </script>
+
+    <!-- 设备详情 -->
+    <script id="assetDetailBox" type="text/html">
+        <div id="assetDetail" class="assetDetailBox">
+            <div class="table-box">
+                <gd-table :config="tableAssetDetailConfig"></gd-table>
+            </div>
+        </div>
+    </script>
+
+    <!-- 授权详情 -->
+    <script id="authorizedDetailBox" type="text/html">
+        <div id="assetDetail" class="authorizedDetail">
+            <gd-toolbar :config="toolbarAuthorizedTableConfig"></gd-toolbar>
+            <div class="table-box">
+                <gd-table :config="authorizedTableConfig"></gd-table>
+            </div>
+        </div>
+    </script>
+
+    <!-- 导入 -->
+    <script type="text/html" id="importUserBox">
+        <div id="importUser">
+            <form id="uploadForm" enctype="multipart/form-data" method="post" class="clearfix">
+                <div>
+                    <span style="top:-34px;">方式</span>
+                    <div class="label-readio">
+                        <label class="gd-radio" v-for="(tab,index) in importMode">
+                            <input type="radio" value="Radio1" name="radio" :checked="index == 0" @change="radioChange(index)">
+                            <i></i>
+                            {{tab}}
+                        </label>
+                    </div>
+                    <span class="help-title"><i class="icon-help"></i> 上传自定义用户列表，将覆盖系统中已有的用户信息</span>
+                </div>
+                <div>
+                    <span>模板</span>
+                    <button type="button" class="gd-btn-cancel btn-export-down" @click="downModel">下载</button>
+                </div>
+                <div>
+                    <span style="top:-10px;">上传文件</span>
+                    <div class="upload-file">
+                        <div class="import-input">
+                            <input type="text" class="gd-input" id="incCopyFile" readonly="readonly">
+                            <input type="hidden" name="MAX_FILE_SIZE" value="10000000000">
+                            <input id="incTrueFile" type="file" name="file" accept="" class="import-file">
+                            <span class="icon-file btn-file"></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </script>
+
+    <script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/encrypt.js}"></script>
+    <script th:src="@{/js/sha256.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/user.js}"></script>
+
+</body>
+
+</html>

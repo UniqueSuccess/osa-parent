@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.system.mapper.UserAssetAssetgroupMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.system.entity.UserAssetAssetgroup">
+        <id column="user_guid" property="userGuid" />
+        <result column="type" property="type" />
+        <result column="asset_id" property="assetId" />
+        <result column="assetgroup_id" property="assetgroupId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        user_guid,type, asset_id, assetgroup_id
+    </sql>
+
+
+    <!-- 获取设备组数量 -->
+    <select id="countAssetgroupByUserGuidInPage" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT  COUNT(1)
+        FROM t_user_asset_assetgroup uaag
+        LEFT JOIN t_assetgroup ag ON ag.id = uaag.assetgroup_id
+        <where>
+            <if test="searchStr != null">
+                AND  ag.name LIKE #{searchStr}
+            </if>
+            <if test="type != null">
+                AND  uaag.type = #{type}
+            </if>
+        </where>
+    </select>
+
+    <!-- 获取设备组分页 -->
+    <select id="getAssetgroupByUserGuidInPage" parameterType="java.util.Map" resultType="com.goldencis.osa.system.entity.UserAssetAssetgroup">
+        SELECT uaag.*,ag.name AS assetgroupName
+        FROM t_user_asset_assetgroup uaag
+        LEFT JOIN t_assetgroup ag ON ag.id = uaag.assetgroup_id
+        <where>
+            <if test="searchStr != null">
+                AND  ag.name LIKE #{searchStr}
+            </if>
+            <if test="type != null">
+                AND uaag.type = #{type}
+            </if>
+        </where>
+        limit #{start} , #{length}
+    </select>
+
+    <!-- 获取设备数量 -->
+    <select id="countAssetByUserGuidInPage" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT  COUNT(1)
+        FROM t_user_asset_assetgroup uaag
+        LEFT JOIN t_asset a ON a.id = uaag.asset_id
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = uaag.asset_id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        LEFT JOIN t_asset_type t ON t.id = a.type
+        <where>
+            <if test="searchStr != null">
+                AND ( ag.name LIKE #{searchStr} or  a.name like #{searchStr} or t.name like  #{searchStr})
+            </if>
+            <if test="type != null">
+                AND uaag.type = #{type}
+            </if>
+        </where>
+    </select>
+
+    <!-- 获取设备分页 -->
+    <select id="getAssetByUserGuidInPage" parameterType="java.util.Map" resultType="com.goldencis.osa.system.entity.UserAssetAssetgroup">
+        SELECT
+            uaag.*,
+            ag.id AS assetgroupId,
+            ag.name AS assetgroupName,
+            a.ip AS assetIp,
+            a.name AS assetName,
+            t.id AS assettypeId,
+            t.name AS assettypeName,
+            t.icon AS assettypeIcon
+        FROM t_user_asset_assetgroup uaag
+        LEFT JOIN t_asset a ON a.id = uaag.asset_id
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id =  uaag.asset_id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        LEFT JOIN t_asset_type t ON t.id = a.type
+        <where>
+            <if test="searchStr != null">
+                AND ( ag.name LIKE #{searchStr} or  a.name like #{searchStr} or t.name like  #{searchStr})
+            </if>
+            <if test="type != null">
+                AND uaag.type = #{type}
+            </if>
+        </where>
+        limit #{start} , #{length}
+    </select>
+
+
+
+    <!-- 用户通用查询结果列 -->
+    <sql id="User_Column_List">
+        u.guid, u.username, u.password, u.department, u.name, u.authentication_method, u.strategy, u.visible, u.email, u.phone, u.address, u.status, u.skin, u.last_login_time, u.error_login_count, u.error_login_last_time, u.create_time, u.create_by,
+        u.update_time, u.update_by
+    </sql>
+
+    <!-- 用户、角色表 -->
+    <sql id="UserRole_Column_List">
+       ur.role_guid, ur.user_guid
+    </sql>
+
+    <!-- 获取系统用户数据  GROUP BY 去重；ORDER BY 时间递增-->
+    <select id="getSystemUsers" parameterType="map" resultType="com.goldencis.osa.core.entity.User">
+        SELECT
+            <include refid="User_Column_List"></include> ,
+            <include refid="UserRole_Column_List"></include>
+        FROM t_user u
+        LEFT JOIN t_user_role ur ON ur.user_guid = u.guid
+        <where>
+            <if test="roleList != null and roleList.size()>0">
+                AND ur.role_guid IN
+                <foreach collection="roleList" open="(" separator="," close=")" item="roleGuid">
+                    #{roleGuid}
+                </foreach>
+            </if>
+            <if test="searchStr != null">
+                and u.name like concat('%', #{searchStr}, '%')
+            </if>
+        </where>
+        GROUP BY u.username
+        ORDER BY u.create_time
+    </select>
+
+</mapper>

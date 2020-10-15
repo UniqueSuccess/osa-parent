@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.task.mapper.TaskAssetMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.task.entity.TaskAsset">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="once" property="once" />
+        <result column="cron" property="cron" />
+        <result column="type" property="type" />
+        <result column="password" property="password" />
+        <result column="rule" property="rule" />
+        <result column="length" property="length" />
+        <result column="cycle" property="cycle" />
+        <result column="day" property="day" />
+        <result column="time" property="time" />
+        <result column="ftp" property="ftp" />
+        <result column="ftp_addr" property="ftpAddr" />
+        <result column="ftp_dir" property="ftpDir" />
+        <result column="ftp_account" property="ftpAccount" />
+        <result column="ftp_pwd" property="ftpPwd" />
+        <result column="email" property="email" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, once, cron, type, password, rule, length, cycle, day, time, ftp, ftp_addr, ftp_dir, ftp_account, ftp_pwd, email
+    </sql>
+
+</mapper>

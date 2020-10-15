@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.strategy.mapper.StrategyLogintimeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.strategy.entity.StrategyLogintime">
+        <id column="id" property="id" />
+        <result column="strategy_id" property="strategyId" />
+        <result column="day_type" property="dayType" />
+        <result column="start_hourtime" property="startHourtime" />
+        <result column="end_hourtime" property="endHourtime" />
+        <result column="time_zone" property="timeZone" />
+        <result column="create_time" property="createTime" />
+        <result column="create_by" property="createBy" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, strategy_id, day_type, start_hourtime, end_hourtime, time_zone, create_time, create_by
+    </sql>
+
+    <!-- 通过guid获取数据 -->
+    <select id="findStrategyLogintimesByStrategyGuid" parameterType="String" resultType="com.goldencis.osa.strategy.entity.StrategyLogintime">
+        select <include refid="Base_Column_List"></include>
+        from t_strategy_logintime
+        where strategy_id = #{value}
+    </select>
+
+    <!-- 根据策略guid删除限定登录 -->
+    <delete id="deleteStrategyLogintimeByStrategyGuid" parameterType="String">
+         delete from t_strategy_logintime
+         where  strategy_id=#{value}
+    </delete>
+
+    <!-- 根据策略id、星期 获取 登录时间 -->
+    <select id="findStrategyLogointimeByIdAndWeekday"  resultType="com.goldencis.osa.strategy.entity.StrategyLogintime">
+        select <include refid="Base_Column_List"></include>
+        from t_strategy_logintime
+        <where>
+            <if test="strategyId != null">
+               and strategy_id = #{strategyId}
+            </if>
+            <if test="weekDay != null">
+                and day_type = #{weekDay}
+            </if>
+        </where>
+    </select>
+</mapper>

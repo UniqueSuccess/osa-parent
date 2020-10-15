@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.approval.mapper.ApprovalFlowMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.approval.entity.ApprovalFlow">
+        <id column="id" property="id" />
+        <result column="definition_id" property="definitionId" />
+        <result column="granted_method" property="grantedMethod" />
+        <result column="name" property="name" />
+        <result column="status" property="status" />
+        <result column="point_id" property="pointId" />
+        <result column="applicant_id" property="applicantId" />
+        <result column="applicant_username" property="applicantUsername" />
+        <result column="applicant_name" property="applicantName" />
+        <result column="relation_num" property="relationNum" />
+        <result column="reason" property="reason" />
+        <result column="remark" property="approvalRemark" />
+        <result column="apply_time" property="applyTime" />
+        <result column="finish_time" property="finishTime" />
+        <result column="approval_expire_time" property="approvalExpireTime" />
+        <result column="approval_expire_result" property="approvalExpireResult" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        f.id, definition_id, granted_method, f.name, status, f.point_id, applicant_id, applicant_username, applicant_name, relation_num, reason, apply_time, finish_time,approval_expire_time,approval_expire_result
+    </sql>
+
+    <!-- 分页查询sql -->
+    <sql id="page_select_sql">
+        <if test="searchStr !=null">
+            AND ( f.name LIKE #{searchStr} OR f.applicant_username LIKE #{searchStr} OR f.applicant_name LIKE #{searchStr})
+        </if>
+        <if test="startTime != null">
+            AND  f.apply_time &gt; #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND  f.apply_time &lt; #{endTime}
+        </if>
+        <if test="endTime != null">
+            AND  f.apply_time &lt; #{endTime}
+        </if>
+        <if test="approvalType != null and approvalType == 0  ">
+            AND  f.status = 0
+        </if>
+        <if test="approvalType != null and approvalType == 1  ">
+            AND  f.status != 0
+        </if>
+        <if test="curUserId != null ">
+            AND f.applicant_id IN (
+                SELECT operator_guid  FROM t_auditor_operator ao
+                WHERE ao.auditor_guid = #{curUserId} )
+        </if>
+        <if test="definitionTypeSet != null and definitionTypeSet.size()>0 ">
+            AND f.definition_id  in
+            <foreach collection="definitionTypeSet" open="(" close=")" separator="," item="item">
+                #{item}
+            </foreach>
+        </if>
+        <if test="grantedMethodList != null and grantedMethodList.size()>0">
+            AND granted_method IN
+            <foreach collection="grantedMethodList" item="grantedMethod" open="(" separator="," close=")">
+                #{grantedMethod}
+            </foreach>
+        </if>
+    </sql>
+
+    <!-- 根据授权审批获取总数
+    name = "approvalType", value = "审批类型（0待审批，1已审批）"
+    -->
+    <select id="countApprovalFlowGrantedsInPage" parameterType="map" resultType="Integer">
+        SELECT COUNT(1) FROM t_approval_flow f
+        <where>
+           <include refid="page_select_sql"></include>
+        </where>
+    </select>
+
+    <!-- 分页获取授权审批数据 -->
+    <select id="getApprovalFlowGrantedsInPage" parameterType="map" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"></include> , d.remark remark
+        FROM t_approval_flow f
+        LEFT JOIN t_approval_detail d ON f.id = d.flow_id
+        <where>
+            <include refid="page_select_sql"></include>
+        </where>
+        GROUP BY id
+        <if test="orderType == 'desc'">
+            ORDER BY f.apply_time DESC
+        </if>
+        <if test="orderType == 'asc'">
+            ORDER BY f.apply_time ASC
+        </if>
+        limit #{start} , #{length}
+    </select>
+
+    <!-- 根据命令获取总数
+       name = "approvalType", value = "审批类型（0待审批，1已审批）"
+       -->
+    <select id="countApprovalFlowComandsInPage" parameterType="map" resultType="Integer">
+        SELECT COUNT(1) FROM t_approval_flow f
+        <where>
+            <include refid="page_select_sql"></include>
+        </where>
+    </select>
+
+    <!-- 分页获取命令审批数据 -->
+    <select id="getApprovalFlowComandsInPage" parameterType="map" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"></include>
+        FROM t_approval_flow f
+        <where>
+            <include refid="page_select_sql"></include>
+        </where>
+        GROUP BY id
+        <if test="orderType == 'desc'">
+            ORDER BY f.apply_time DESC
+        </if>
+        <if test="orderType == 'asc'">
+            ORDER BY f.apply_time ASC
+        </if>
+        limit #{start} , #{length}
+    </select>
+
+
+    <!-- 获取授权待审批数据 -->
+    <select id="getApprovalFlowGranteds" parameterType="map" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"></include>
+        FROM t_approval_flow f
+        <where>
+            <if test="approvalType != null and approvalType == 0  ">
+                AND  f.status = 0
+            </if>
+            <if test="definitionTypeSet != null and definitionTypeSet.size()>0 ">
+                AND f.definition_id  in
+                <foreach collection="definitionTypeSet" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY f.apply_time DESC
+    </select>
+    <select id="findUnfinishedApprovalListByAssetIdAndDefinitionId" resultMap="BaseResultMap">
+        SELECT *
+        FROM t_approval_flow f
+        LEFT JOIN t_approval_flow_info_granted g ON f.id = g.flow_id
+        WHERE f.status = 0
+        <if test="assetId != null">
+          AND g.asset_id = #{assetId}
+        </if>
+        <if test="definitionId != null">
+          AND f.definition_id = #{definitionId}
+        </if>
+    </select>
+
+    <!-- 根据flow id获取flow 和 审批结果备注 -->
+    <select id="getApprovalFlowDetailByFlowId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"></include> , d.remark as approvalRemark
+        FROM t_approval_flow f
+        LEFT JOIN t_approval_detail d ON f.id = d.flow_id
+        WHERE  f.id = #{value }
+    </select>
+    <select id="findUnfinishedApprovalListByAssetAccountIdAndDefinitionId" resultMap="BaseResultMap">
+        SELECT *
+        FROM t_approval_flow f
+        LEFT JOIN t_approval_flow_info_granted g ON f.id = g.flow_id
+        WHERE f.status = 0
+        <if test="assetAccountId != null">
+          AND g.asset_account_id = #{assetAccountId}
+        </if>
+        <if test="definitionId != null">
+          AND f.definition_id = #{definitionId}
+        </if>
+    </select>
+    <select id="findUnfinishedApprovalListByAssetGroupIdAndDefinitionId" resultMap="BaseResultMap">
+        SELECT *
+        FROM t_approval_flow f
+        LEFT JOIN t_approval_flow_info_granted g ON f.id = g.flow_id
+        WHERE f.status = 0
+        <if test="assetGroupId != null">
+          AND g.assetgroup_id = #{assetGroupId}
+        </if>
+        <if test="definitionId != null">
+          AND f.definition_id = #{definitionId}
+        </if>
+    </select>
+
+    <!-- 获取审批配置-->
+    <select id="getApprovalExpireSettings" resultType="java.lang.String">
+        select content from t_system_set where code='Platform';
+    </select>
+
+
+</mapper>

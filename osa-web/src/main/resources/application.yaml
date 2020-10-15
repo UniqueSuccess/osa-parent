@@ -1,0 +1,80 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/goldencis_osa?generateSimpleParameterMetadata=true&characterEncoding=UTF-8&allowMultiQueries=true
+    username: root
+    password: goldencis
+    type: com.alibaba.druid.pool.DruidDataSource
+  thymeleaf:
+    cache: false
+  output:
+    ansi:
+      enabled: detect
+  cache:
+    caffeine:
+      spec: initialCapacity=100,maximumSize=1000,expireAfterAccess=600s
+  redis:
+    database: 0
+    host: 10.10.16.116
+    port: 6379
+    timeout: 10000
+    jedis:
+      pool:
+        max-active: 200
+        max-idle: 20
+        min-idle: 5
+        max-wait: 10000
+  resources:
+    chain:
+      cache: false
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      additional-paths: resources/**,static/**,templates/**
+  servlet:
+    multipart:
+      max-request-size: 209715200
+      max-file-size: 209715200
+
+server:
+  port: 80
+  servlet:
+    context-path: /osa
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*Mapper.xml
+
+
+goldencis:
+  osa:
+    export-path: /gdsoft/soft/osa/tomcat/webapps/export/
+    host: 127.0.0.1
+    clinet-dirpath: /gdsoft/soft/osa/tomcat/webapps/osa/WEB-INF/classes/static/client
+    clinet-filename: dpclient.exe
+    osabinPath: /gdsoft/soft/osa/bin
+    unpackageFilename: clientupdate.sh
+    eth: eth0
+    service:
+      session:
+        baseUrl: http://127.0.0.1:8003/session
+        activate: /activate
+        close: /close
+        block: /block
+        replaceSession: /replaceSessionId
+        query: /query
+        status: /status
+        info: /info
+        addition: /addition
+  client:
+    winServer2003Url: reqremote2003
+    winServerUrl: reqremoteapp
+    linuxServerUrl: reqlinuxtool
+    packageuploadPath: /gdsoft/soft/osa/tomcat/webapps/osa/WEB-INF/classes/static/client/package
+    packageuploadFileName: ClientAgent.exe
+    xpPackageuploadFileName: dpclient-chrome.exe
+    bridgeuploadFileName: BridgeAgent.exe
+    clientupdateuploadPath: /gdsoft/soft/osa/tomcat/webapps/osa/WEB-INF/classes/static/client/update/client
+    clientupdateuploadFileName: clientupgrade.tar.gz
+    bridgeupdateuploadPath: /gdsoft/soft/osa/tomcat/webapps/osa/WEB-INF/classes/static/client/update/server
+    bridgeupdateuploadFileName: serverupgrade.tar.gz

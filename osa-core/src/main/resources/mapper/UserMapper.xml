@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.core.mapper.UserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.core.entity.User">
+        <id column="guid" property="guid"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="department" property="department.id"/>
+        <result column="dept_name" property="department.name"/>
+        <result column="pid" property="department.pid"/>
+        <result column="department_remark" property="department.departmentRemark"/>
+        <result column="owner" property="department.owner"/>
+        <result column="department_tel" property="department.departmentTel"/>
+        <result column="tree_path" property="department.treePath"/>
+        <result column="level" property="department.level"/>
+        <result column="dept_status" property="department.status"/>
+        <result column="name" property="name"/>
+        <result column="authentication_method" property="authenticationMethod"/>
+        <result column="strategy" property="strategy"/>
+        <result column="usergroups_name" property="usergroupsName"/>
+        <result column="visible" property="visible"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="address" property="address"/>
+        <result column="status" property="status"/>
+        <result column="skin" property="skin"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="error_login_count" property="errorLoginCount"/>
+        <result column="error_login_last_time" property="errorLoginLastTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="ukeyId" property="ukeyId"/>
+        <result column="ukey" property="ukeyName"/>
+
+        <collection property="usergroups" ofType="com.goldencis.osa.core.entity.Usergroup">
+            <id column="id" property="id"/>
+            <result column="usergroup_name" property="name"/>
+            <result column="usergroup_pid" property="pid"/>
+            <result column="remark" property="remark"/>
+            <result column="tree_path" property="treePath"/>
+            <result column="level" property="level"/>
+            <result column="usergroup_status" property="status"/>
+            <result column="create_time" property="createTime"/>
+            <result column="create_by" property="createBy"/>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        u.guid, u.username, u.password, u.department, u.name, u.authentication_method, u.strategy, u.visible, u.email, u.phone, u.address, u.status, u.skin, u.last_login_time, u.error_login_count, u.error_login_last_time, u.create_time, u.create_by,
+        u.update_time, u.update_by
+    </sql>
+
+    <!-- 部门表 -->
+    <sql id="department_Column_List">
+        d.id, d.name dept_name, d.pid, d.department_remark, d.owner, d.department_tel, d.tree_path, d.level, d.status dept_status
+    </sql>
+
+    <!-- 用户组表 -->
+    <sql id="Usergroup_Column_List">
+        ug.id, ug.name usergroup_name,ug.pid usergroup_pid, ug.remark, ug.tree_path, ug.level, ug.status usergroup_status, ug.create_time, ug.create_by
+    </sql>
+
+    <!-- 用户、角色表 -->
+    <sql id="UserRole_Column_List">
+       ur.role_guid, ur.user_guid
+    </sql>
+
+    <!-- 根据用户guid获取 用户（包含用户组、用户角色）-->
+    <select id="findUserByGuid" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="department_Column_List"></include>
+        FROM t_user u
+        LEFT JOIN t_department d
+        ON u.department = d.id
+        WHERE guid = #{value}
+    </select>
+
+    <select id="findUserByUsername" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="department_Column_List"></include>
+        FROM t_user u
+        LEFT JOIN t_department d
+        ON u.department = d.id
+        WHERE username = #{value}
+    </select>
+
+    <!-- 获取用户总数 -->
+    <select id="countUsersInPage" parameterType="map" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT(u.guid))
+        FROM t_user u
+        LEFT JOIN t_user_usergroup uu ON uu.user_guid = u.guid
+        LEFT JOIN t_user_role ur ON ur.user_guid = u.guid
+        <where>
+            <if test="roleList != null">
+                AND ur.role_guid IN
+                <foreach collection="roleList" open="(" separator="," close=")" item="roleGuid">
+                    #{roleGuid}
+                </foreach>
+            </if>
+
+            <if test="usergroupList != null">
+                AND uu.usergroup_id IN
+                <foreach collection="usergroupList" open="(" separator="," close=")" item="usergroupId">
+                    #{usergroupId}
+                </foreach>
+            </if>
+
+            <if test="statusList != null">
+                AND u.status IN
+                <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+
+            <if test="authenticationMethodList != null">
+                AND u.authentication_method IN
+                <foreach collection="authenticationMethodList" item="authenticationMethod" open="(" separator=","
+                         close=")">
+                    #{authenticationMethod}
+                </foreach>
+            </if>
+            <if test="userIdList != null">
+                AND u.guid IN
+                <foreach collection="userIdList" item="item" open="(" separator=","
+                         close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="searchStr != null">
+                AND ( u.name LIKE #{searchStr} OR u.username LIKE #{searchStr})
+            </if>
+            <if test="startTime != null">
+                AND u.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND u.create_time &lt; #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 分页获取用户数据 -->
+    <select id="getUsersInPage" parameterType="map" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="Usergroup_Column_List"></include>
+        ,
+        <include refid="UserRole_Column_List"></include>
+        ,
+        uk.id as ukeyId
+        ,
+        uk.name as ukey
+        ,
+        GROUP_CONCAT(ug.name) usergroups_name
+        FROM t_user u
+        LEFT JOIN t_user_usergroup uu ON uu.user_guid = u.guid
+        LEFT JOIN t_usergroup ug ON ug.id = uu.usergroup_id
+        LEFT JOIN t_user_role ur ON ur.user_guid = u.guid
+        LEFT JOIN t_ukey uk ON uk.user_guid = u.guid
+        <where>
+            <if test="roleList != null">
+                AND ur.role_guid IN
+                <foreach collection="roleList" open="(" separator="," close=")" item="roleGuid">
+                    #{roleGuid}
+                </foreach>
+            </if>
+
+            <if test="usergroupList != null">
+                AND uu.usergroup_id IN
+                <foreach collection="usergroupList" open="(" separator="," close=")" item="usergroupId">
+                    #{usergroupId}
+                </foreach>
+            </if>
+
+            <if test="statusList != null">
+                AND u.status IN
+                <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+
+            <if test="authenticationMethodList != null">
+                AND u.authentication_method IN
+                <foreach collection="authenticationMethodList" item="authenticationMethod" open="(" separator=","
+                         close=")">
+                    #{authenticationMethod}
+                </foreach>
+            </if>
+            <if test="userIdList != null">
+                AND u.guid IN
+                <foreach collection="userIdList" item="item" open="(" separator=","
+                         close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="searchStr != null">
+                AND ( u.name LIKE #{searchStr} OR u.username LIKE #{searchStr})
+            </if>
+            <if test="startTime != null">
+                AND u.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND u.create_time &lt; #{endTime}
+            </if>
+        </where>
+        GROUP BY guid
+        <if test="orderType == 'desc'">
+            ORDER BY u.last_login_time DESC
+        </if>
+        <if test="orderType == 'asc'">
+            ORDER BY u.last_login_time ASC
+        </if>
+        limit #{start} , #{length}
+    </select>
+
+    <!-- 通过策略guid查询是否有用户使用策略 -->
+    <select id="findUserByStrategyId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="department_Column_List"></include>
+        FROM t_user u
+        LEFT JOIN t_department d
+        ON u.department = d.id
+        WHERE strategy = #{value}
+    </select>
+
+    <update id="updateLastLoginTime" parameterType="map">
+        update t_user set last_login_time=#{lastLoginTime} where guid=#{guid}
+    </update>
+
+
+    <!-- 获取不同类型的系统用户，过滤超级管理员  -->
+    <select id="getUsersByType" parameterType="map" resultType="com.goldencis.osa.core.entity.User">
+        select
+        <include refid="Base_Column_List"></include>
+        FROM t_user u
+        LEFT JOIN t_user_role ur ON ur.user_guid = u.guid
+        LEFT JOIN t_role r ON r.guid = ur.role_guid
+        WHERE u.guid != '1' AND r.guid IN
+        ( SELECT guid
+        FROM t_role
+        <where>
+            <if test="pid != null ">
+                AND pid = #{pid}
+            </if>
+        </where>
+        )
+    </select>
+
+    <select id="getUserByPermission" parameterType="map" resultType="com.goldencis.osa.core.entity.User">
+        SELECT
+        <include refid="Base_Column_List"/>
+        ,
+        r.name as roleName
+        FROM
+        t_user u
+        LEFT JOIN t_user_role ur ON ur.user_guid = u.guid
+        left join t_role r on r.guid=ur.role_guid
+        LEFT JOIN t_role_permission rp ON ur.role_guid = rp.role_guid
+        LEFT JOIN t_permission p ON p.id = rp.permission_id
+        WHERE
+        p.resource_type = #{resourceType}
+        AND p.resource_id IN
+        <foreach collection="resourceId" open="(" close=")" item="item" separator=",">
+            #{item}
+        </foreach>
+        <if test="excludeSystem">
+            AND u.guid != '1'
+        </if>
+        GROUP BY
+        u.username
+    </select>
+
+    <!-- 根据操作员的guid，查找对应的审批员集合（过滤超级管理员） -->
+    <select id="findAuditorByOperatorGuid" resultType="com.goldencis.osa.core.entity.User">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM t_user u
+        LEFT JOIN t_auditor_operator ao ON u.guid = ao.auditor_guid
+        WHERE ao.operator_guid = #{guid}
+    </select>
+
+    <update id="updateSystemUserInfo" parameterType="map">
+        update t_user SET name=#{name}
+        <if test="password != null">
+            , password=#{password}
+        </if>
+        WHERE guid=#{guid};
+    </update>
+
+    <select id="getUserReportChart" parameterType="map" resultType="java.util.Map">
+        SELECT a.name, COUNT(*) AS num FROM
+        (
+        SELECT c.`user_guid`, a.usergroup_id, b.`name` FROM `t_granted` a LEFT JOIN `t_usergroup` b ON a.`usergroup_id`
+        = b.`id` RIGHT JOIN `t_user_usergroup` c ON a.`usergroup_id` = c.`usergroup_id` WHERE a.usergroup_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and a.create_time &gt;= #{params.startTime} and a.create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY user_guid, NAME
+        UNION
+        SELECT a.`user_id` user_guid, b.usergroup_id, c.name FROM `t_granted` a LEFT JOIN `t_user_usergroup` b ON
+        a.user_id = b.user_guid LEFT JOIN `t_usergroup` c ON b.`usergroup_id` = c.`id` WHERE a.user_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and a.create_time &gt;= #{params.startTime} and a.create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY user_id, NAME
+        ) a GROUP BY usergroup_id
+    </select>
+
+    <select id="getUserReportCount" parameterType="map" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM (
+        SELECT
+        a.*
+        FROM
+        (SELECT
+        g.id AS account_id,
+        d.guid,
+        a.create_time,
+        b.`id` asset_id,
+        c.name typename,
+        b.name assetname,
+        b.ip,
+        g.username account,
+        d.`username`,
+        d.`name` truename,
+        GROUP_CONCAT(DISTINCT(f.`name`)) groupname,
+        l.`name` strategy,
+        j.`name` asset_groupname
+        FROM
+        (SELECT
+        create_time, asset_id, user_id, account_id
+        FROM
+        `t_granted`
+        WHERE account_id IS NOT NULL
+        AND user_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY account_id,
+        user_id) a
+        LEFT JOIN `t_asset` b
+        ON a.asset_id = b.`id`
+        LEFT JOIN `t_asset_assetgroup` i ON a.asset_id = i.`asset_id`
+        LEFT JOIN `t_assetgroup` j ON i.`assetgroup_id` = j.`id`
+        LEFT JOIN t_asset_type c
+        ON b.type = c.id
+        LEFT JOIN t_user d
+        ON a.user_id = d.guid
+        LEFT JOIN `t_strategy` l ON d.`strategy` = l.`guid`
+        LEFT JOIN `t_user_usergroup` e
+        ON d.`guid` = e.`user_guid`
+        LEFT JOIN `t_usergroup` f
+        ON e.`usergroup_id` = f.`id`
+        LEFT JOIN `t_asset_account` g
+        ON a.account_id = g.id
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND c.id IN (${params.assetType})
+        </if>
+        GROUP BY g.id, d.guid
+        UNION
+        SELECT
+        c.id AS account_id,
+        f.guid,
+        a.create_time,
+        b.`asset_id`,
+        e.name typename,
+        d.name assetname,
+        d.ip,
+        c.username account,
+        f.`username`,
+        f.`name` truename,
+        GROUP_CONCAT(DISTINCT(h.`name`)) groupname,
+        l.`name` strategy,
+        j.`name` asset_groupname
+        FROM
+        (SELECT
+        asset_id,
+        create_time, user_id, assetgroup_id
+        FROM
+        `t_granted`
+        WHERE assetgroup_id IS NOT NULL
+        AND user_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY assetgroup_id,
+        user_id) a
+        LEFT JOIN `t_asset_assetgroup` b
+        ON a.`assetgroup_id` = b.`assetgroup_id`
+        LEFT JOIN `t_asset_account` c
+        ON c.`asset_id` = b.`asset_id`
+        LEFT JOIN `t_asset` d
+        ON d.id = b.`asset_id`
+        LEFT JOIN `t_asset_assetgroup` i ON a.asset_id = i.`asset_id`
+        LEFT JOIN `t_assetgroup` j ON i.`assetgroup_id` = j.`id`
+        LEFT JOIN t_asset_type e
+        ON d.type = e.id
+        LEFT JOIN `t_user` f
+        ON f.`guid` = a.user_id
+        LEFT JOIN `t_strategy` l ON f.`strategy` = l.`guid`
+        LEFT JOIN `t_user_usergroup` g
+        ON g.`user_guid` = a.user_id
+        LEFT JOIN `t_usergroup` h
+        ON h.`id` = g.`usergroup_id`
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND e.id IN (${params.assetType})
+        </if>
+        GROUP BY c.`id`, f.guid
+        UNION
+        SELECT
+        f.id AS account_id,
+        c.guid,
+        a.create_time,
+        a.asset_id,
+        e.name typename,
+        d.name assetname,
+        d.ip,
+        f.`username` account,
+        c.`username`,
+        c.`name` truename,
+        GROUP_CONCAT(DISTINCT (h.`name`)) groupname,
+        l.`name` strategy,
+        j.`name` asset_groupname
+        FROM
+        (SELECT
+        create_time, asset_id, user_id, account_id, usergroup_id
+        FROM
+        `t_granted`
+        WHERE account_id IS NOT NULL
+        AND usergroup_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY account_id,
+        usergroup_id) a
+        LEFT JOIN `t_user_usergroup` b
+        ON a.usergroup_id = b.`usergroup_id`
+        LEFT JOIN `t_user` c
+        ON c.`guid` = b.`user_guid`
+        LEFT JOIN `t_strategy` l ON c.`strategy` = l.`guid`
+        LEFT JOIN `t_asset` d
+        ON d.`id` = a.asset_id
+        LEFT JOIN `t_asset_assetgroup` i ON a.asset_id = i.`asset_id`
+        LEFT JOIN `t_assetgroup` j ON i.`assetgroup_id` = j.`id`
+        LEFT JOIN `t_asset_type` e
+        ON e.`id` = d.`type`
+        LEFT JOIN `t_asset_account` f
+        ON f.`id` = a.account_id
+        LEFT JOIN `t_user_usergroup` g
+        ON g.`user_guid` = c.guid
+        LEFT JOIN `t_usergroup` h
+        ON h.`id` = g.`usergroup_id`
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND e.id IN (${params.assetType})
+        </if>
+        GROUP BY f.`id`, c.guid
+        UNION
+        SELECT
+        d.id AS account_id,
+        f.guid,
+        a.create_time,
+        b.`asset_id`,
+        d.`username` account,
+        c.`name` assetname,
+        c.`ip`,
+        f.`username`,
+        g.`name` typename,
+        f.`name` truename,
+        GROUP_CONCAT(DISTINCT (h.`name`)) groupname,
+        l.`name` strategy,
+        j.`name` asset_groupname
+        FROM
+        (SELECT
+        asset_id,
+        create_time, assetgroup_id, usergroup_id
+        FROM
+        `t_granted`
+        WHERE assetgroup_id IS NOT NULL
+        AND usergroup_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY assetgroup_id,
+        usergroup_id) a
+        LEFT JOIN `t_asset_assetgroup` b
+        ON b.`assetgroup_id` = a.assetgroup_id
+        LEFT JOIN `t_asset` c
+        ON c.`id` = b.`asset_id`
+        LEFT JOIN `t_asset_assetgroup` i ON a.asset_id = i.`asset_id`
+        LEFT JOIN `t_assetgroup` j ON i.`assetgroup_id` = j.`id`
+        LEFT JOIN `t_asset_account` d
+        ON d.`asset_id` = b.`asset_id`
+        LEFT JOIN `t_user_usergroup` e
+        ON e.`usergroup_id` = a.usergroup_id
+        LEFT JOIN `t_user` f
+        ON f.`guid` = e.`user_guid`
+        LEFT JOIN `t_strategy` l ON f.`strategy` = l.`guid`
+        LEFT JOIN `t_asset_type` g
+        ON g.`id` = c.`type`
+        LEFT JOIN `t_usergroup` h
+        ON h.`id` = e.`usergroup_id`
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND g.id IN (${params.assetType})
+        </if>
+        GROUP BY d.id,f.guid) a
+        WHERE 1=1 AND a.guid IS NOT NULL AND a.asset_id IS NOT NULL
+        <if test="params.searchStr != null and params.searchStr != ''">
+            AND concat(a.account, a.assetname, a.ip, a.username, a.typename, a.truename, a.strategy, a.asset_groupname,
+            a.groupname) like concat('%',#{params.searchStr},'%')
+        </if>
+        GROUP BY a.account_id, a.guid) b
+    </select>
+
+
+    <select id="getUserReportList" parameterType="map" resultType="com.goldencis.osa.core.entity.UserReportEntity">
+        SELECT
+        a.*
+        FROM
+        (SELECT
+        g.id AS account_id,
+        d.guid,
+        a.create_time,
+        b.`id` asset_id,
+        c.name typename,
+        b.name assetname,
+        b.ip,
+        g.username account,
+        d.`username`,
+        d.`name` truename,
+        GROUP_CONCAT(DISTINCT(f.`name`)) groupname,
+        l.`name` strategy,
+        j.`name` asset_groupname
+        FROM
+        (SELECT
+        create_time, asset_id, user_id, account_id
+        FROM
+        `t_granted`
+        WHERE account_id IS NOT NULL
+        AND user_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY account_id,
+        user_id) a
+        LEFT JOIN `t_asset` b
+        ON a.asset_id = b.`id`
+        LEFT JOIN `t_asset_assetgroup` i ON a.asset_id = i.`asset_id`
+        LEFT JOIN `t_assetgroup` j ON i.`assetgroup_id` = j.`id`
+        LEFT JOIN t_asset_type c
+        ON b.type = c.id
+        LEFT JOIN t_user d
+        ON a.user_id = d.guid
+        LEFT JOIN `t_strategy` l ON d.`strategy` = l.`guid`
+        LEFT JOIN `t_user_usergroup` e
+        ON d.`guid` = e.`user_guid`
+        LEFT JOIN `t_usergroup` f
+        ON e.`usergroup_id` = f.`id`
+        LEFT JOIN `t_asset_account` g
+        ON a.account_id = g.id
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND c.id IN (${params.assetType})
+        </if>
+        GROUP BY g.id, d.guid
+        UNION
+        SELECT
+        c.id AS account_id,
+        f.guid,
+        a.create_time,
+        b.`asset_id`,
+        e.name typename,
+        d.name assetname,
+        d.ip,
+        c.username account,
+        f.`username`,
+        f.`name` truename,
+        GROUP_CONCAT(DISTINCT(h.`name`)) groupname,
+        l.`name` strategy,
+        j.`name` asset_groupname
+        FROM
+        (SELECT
+        asset_id,
+        create_time, user_id, assetgroup_id
+        FROM
+        `t_granted`
+        WHERE assetgroup_id IS NOT NULL
+        AND user_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY assetgroup_id,
+        user_id) a
+        LEFT JOIN `t_asset_assetgroup` b
+        ON a.`assetgroup_id` = b.`assetgroup_id`
+        LEFT JOIN `t_asset_account` c
+        ON c.`asset_id` = b.`asset_id`
+        LEFT JOIN `t_asset` d
+        ON d.id = b.`asset_id`
+        LEFT JOIN `t_asset_assetgroup` i ON a.asset_id = i.`asset_id`
+        LEFT JOIN `t_assetgroup` j ON i.`assetgroup_id` = j.`id`
+        LEFT JOIN t_asset_type e
+        ON d.type = e.id
+        LEFT JOIN `t_user` f
+        ON f.`guid` = a.user_id
+        LEFT JOIN `t_strategy` l ON f.`strategy` = l.`guid`
+        LEFT JOIN `t_user_usergroup` g
+        ON g.`user_guid` = a.user_id
+        LEFT JOIN `t_usergroup` h
+        ON h.`id` = g.`usergroup_id`
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND e.id IN (${params.assetType})
+        </if>
+        GROUP BY c.`id`, f.guid
+        UNION
+        SELECT
+        f.id AS account_id,
+        c.guid,
+        a.create_time,
+        a.asset_id,
+        e.name typename,
+        d.name assetname,
+        d.ip,
+        f.`username` account,
+        c.`username`,
+        c.`name` truename,
+        GROUP_CONCAT(DISTINCT (h.`name`)) groupname,
+        l.`name` strategy,
+        j.`name` asset_groupname
+        FROM
+        (SELECT
+        create_time, asset_id, user_id, account_id, usergroup_id
+        FROM
+        `t_granted`
+        WHERE account_id IS NOT NULL
+        AND usergroup_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY account_id,
+        usergroup_id) a
+        LEFT JOIN `t_user_usergroup` b
+        ON a.usergroup_id = b.`usergroup_id`
+        LEFT JOIN `t_user` c
+        ON c.`guid` = b.`user_guid`
+        LEFT JOIN `t_strategy` l ON c.`strategy` = l.`guid`
+        LEFT JOIN `t_asset` d
+        ON d.`id` = a.asset_id
+        LEFT JOIN `t_asset_assetgroup` i ON a.asset_id = i.`asset_id`
+        LEFT JOIN `t_assetgroup` j ON i.`assetgroup_id` = j.`id`
+        LEFT JOIN `t_asset_type` e
+        ON e.`id` = d.`type`
+        LEFT JOIN `t_asset_account` f
+        ON f.`id` = a.account_id
+        LEFT JOIN `t_user_usergroup` g
+        ON g.`user_guid` = c.guid
+        LEFT JOIN `t_usergroup` h
+        ON h.`id` = g.`usergroup_id`
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND e.id IN (${params.assetType})
+        </if>
+        GROUP BY f.`id`, c.guid
+        UNION
+        SELECT
+        d.id AS account_id,
+        f.guid,
+        a.create_time,
+        b.`asset_id`,
+        d.`username` account,
+        c.`name` assetname,
+        c.`ip`,
+        f.`username`,
+        g.`name` typename,
+        f.`name` truename,
+        GROUP_CONCAT(DISTINCT (h.`name`)) groupname,
+        l.`name` strategy,
+        j.`name` asset_groupname
+        FROM
+        (SELECT
+        asset_id,
+        create_time, assetgroup_id, usergroup_id
+        FROM
+        `t_granted`
+        WHERE assetgroup_id IS NOT NULL
+        AND usergroup_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY assetgroup_id,
+        usergroup_id) a
+        LEFT JOIN `t_asset_assetgroup` b
+        ON b.`assetgroup_id` = a.assetgroup_id
+        LEFT JOIN `t_asset` c
+        ON c.`id` = b.`asset_id`
+        LEFT JOIN `t_asset_assetgroup` i ON a.asset_id = i.`asset_id`
+        LEFT JOIN `t_assetgroup` j ON i.`assetgroup_id` = j.`id`
+        LEFT JOIN `t_asset_account` d
+        ON d.`asset_id` = b.`asset_id`
+        LEFT JOIN `t_user_usergroup` e
+        ON e.`usergroup_id` = a.usergroup_id
+        LEFT JOIN `t_user` f
+        ON f.`guid` = e.`user_guid`
+        LEFT JOIN `t_strategy` l ON f.`strategy` = l.`guid`
+        LEFT JOIN `t_asset_type` g
+        ON g.`id` = c.`type`
+        LEFT JOIN `t_usergroup` h
+        ON h.`id` = e.`usergroup_id`
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND g.id IN (${params.assetType})
+        </if>
+        GROUP BY d.id,f.guid) a
+        WHERE 1=1 AND a.guid IS NOT NULL AND a.asset_id IS NOT NULL
+        <if test="params.searchStr != null and params.searchStr != ''">
+            AND concat(a.account, a.assetname, a.ip, a.username, a.typename, a.truename, a.strategy, a.asset_groupname,
+            a.groupname) like concat('%',#{params.searchStr},'%')
+        </if>
+        GROUP BY a.account_id, a.guid
+        order by ${params.orderColumn} ${params.orderType}
+        limit ${params.start}, ${params.length}
+    </select>
+
+    <delete id="deletePermissionByUserId">
+        delete from t_granted where user_id=#{guid}
+    </delete>
+
+    <select id="getPlatformJsonInfo" resultType="java.lang.String">
+        select content from t_system_set where code='Platform';
+    </select>
+
+    <select id="findDefaultAdminRoleRelationByUsername" resultType="com.goldencis.osa.core.entity.User">
+        SELECT *
+        FROM t_user u
+        WHERE u.username = #{username} AND (u.guid = '1' OR u.guid = '3')
+    </select>
+
+    <!-- 根据策略id 获取 策略更新时间 -->
+    <select id="getStrategyUpdateTime" resultType="java.time.LocalDateTime">
+        SELECT update_time FROM t_strategy
+        WHERE guid = #{value}
+    </select>
+
+    <!-- 通过用户名 获取 用户组名 -->
+    <select id="getUsergroupNamesByUserName" resultType="java.lang.String">
+        SELECT  GROUP_CONCAT(DISTINCT(ug.`name`)) AS userGroupname
+        FROM t_user u
+        LEFT JOIN t_user_usergroup uug  ON uug.`user_guid` = u.`guid`
+        LEFT JOIN t_usergroup ug ON ug.`id` = uug.`usergroup_id`
+        WHERE u.`username`= #{value}
+    </select>
+
+
+    <update id="removeUkeyRelation">
+        UPDATE t_ukey uk set uk.user_guid = null WHERE uk.user_guid=#{guid}
+    </update>
+</mapper>

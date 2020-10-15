@@ -1,0 +1,198 @@
+.table-box {
+    height: calc(100% - 56px);
+}
+
+.gd-toolbar{
+	padding:0 !important;
+}
+.userlistBox{
+	height:100%;
+	padding:0 20px;
+}
+
+.gd-switch{
+    padding:6px 0;
+}
+
+.addAssetBox .gd-select {
+    width: 200px;
+    height: 32px;
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    font-size: 14px;
+}
+
+.gd-select .gd-select-input {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+.container .row input{
+    width:200px!important;
+}
+
+.container .row .gd-tree-inner label{
+    margin-top:2px;
+    height:auto;
+    width:auto !important
+}
+
+.container .row  .gd-tree-inner span{
+    line-height:20px;
+    margin-left:0;
+}
+
+.container .row label.gd-switch{
+    padding-right: 0;
+    text-align: left;
+    height: 18px !important;
+    width: 32px !important;
+}
+
+.container .row .statusSelect label{
+    margin-top:9px;
+    margin-right:20px;
+    width:auto !important;
+    height:auto !important;
+    line-height:1 !important;
+}
+
+.container .row .statusSelect .gd-radio input+i{
+    width:10px;
+    height:10px;
+}
+
+.container .row .statusSelect .gd-radio input+i:after{
+    width:9px;
+    height:9px;
+    left:1px;
+    top:1px;
+}
+
+.asset-type-select{
+    width:50%;
+}
+.assetBox-list,.assetBox-list-oth{
+    clear:both;
+    overflow: hidden;
+}
+.assetBox-list-l{
+    float:left;
+    width:50%;
+}
+.assetBox-list-r{
+    float:left;
+    width:50%;
+}
+.form-title{
+    clear:both;
+    margin:20px 0 10px;
+    overflow: hidden;
+}
+.asset-textarea{
+    width:200px;
+    height:68px;
+    border:1px solid #e1e1e1;
+}
+
+.tableCon{
+    margin:15px 50px;
+    border:1px solid #eee;
+}
+
+#addAssetBox .gd-tree.gd-tree-gray{
+    background-color:#fff;
+}
+
+.tableCon .gd-toolbar{
+    background-color:#fff;
+    padding:0 10px !important;
+    height:44px;
+}
+
+
+.tableCon .gd-table-scroll-v{
+    position:static !important;
+    height:200px;
+}
+
+/* .gd-table-wrapper .gd-table-body table tr:nth-child(odd) {
+    background-color: #fff
+}
+.gd-table-wrapper .gd-table-body table tr:nth-child(even) {
+    background-color: #f7f7f9
+} */
+
+.row .trusteeship label{
+    margin-top:9px;
+    margin-right:20px;
+    width:auto !important;
+    height:auto !important;
+    line-height:1 !important;
+}
+
+.addRuleBox .row label{
+    width:80px !important;
+}
+
+.addProperty{
+    float:left;
+    margin:7px 0 0 15px;
+}
+
+.property-box{
+    padding:5px 0;
+    overflow: hidden;
+}
+.property-box .row{
+    width:280px;
+    float: left;
+}
+
+.property-box .row input,.property-box .row .gd-select{
+    width:160px !important;
+}
+
+.gd-table-wrapper .gd-table-scroll-h{
+   height:calc(100% - 100px)
+}
+
+.rule-con{
+    border-top:1px solid #eee;
+    height:35px
+}
+.rule-con.row{
+    padding:10px 0;
+    float:none;
+    overflow:hidden;
+}
+
+.rule-con.row input{
+    width:520px !important;
+}
+
+.addRuleBox .rule-con.row label{
+    width:60px !important;
+}
+
+.assetDetailBox{
+    height:100%;
+}
+
+.assetTypeTreeBox{
+    width:185px;
+    padding:5px 15px;
+    max-height:380px
+}
+
+.assetTypeTreeBox .gd-tree-arrow{
+    width:16px;
+}
+
+.container .row .help-info{
+    position: relative;
+    top: 1px;
+}

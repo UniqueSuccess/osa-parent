@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.core.mapper.UsergroupMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.core.entity.Usergroup">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="pid" property="pid"/>
+        <result column="remark" property="remark"/>
+        <result column="tree_path" property="treePath"/>
+        <result column="level" property="level"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="create_by" property="createBy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, pid, remark, tree_path, level, status,  create_time, create_by
+    </sql>
+
+    <update id="updateTreePath">
+        UPDATE t_usergroup ug
+        SET ug.tree_path = REPLACE(ug.tree_path, #{oldTreePath}, #{newTreePath})
+        WHERE ug.tree_path LIKE #{oldSelfPath};
+    </update>
+
+    <select id="countUsergroupInPage" parameterType="map" resultType="java.lang.Integer">
+        select count(id) from t_usergroup
+        <where>
+            <if test="searchStr != null">
+                name like #{searchStr}
+            </if>
+        </where>
+    </select>
+
+    <select id="getUsergroupInPage" parameterType="map" resultMap="BaseResultMap">
+        select
+        ug.*,
+        (select count(uu.usergroup_id) from t_user_usergroup uu where uu.usergroup_id=ug.id) as userCount,
+        (case when ugg.`name` is null then '无' else ugg.`name` end) as pname
+        from t_usergroup ug
+        LEFT JOIN t_usergroup ugg ON ug.pid=ugg.id
+        <where>
+            <if test="searchStr != null">
+                ug.name like #{searchStr}
+            </if>
+        </where>
+        <if test="orderColumn != null and orderType != null">
+            ORDER BY #{orderColumn} #{orderType}
+        </if>
+        <if test="start != null and length != null">
+            limit #{start} , #{length}
+        </if>
+    </select>
+
+    <!-- 根据用户组id获取 父级用户组名字 -->
+    <select id="getPnameByUsergroupId" parameterType="java.lang.Integer" resultType="java.lang.String">
+        SELECT NAME FROM t_usergroup
+        WHERE id =
+        ( SELECT pid FROM t_usergroup WHERE id = #{value })
+    </select>
+
+    <delete id="deleteGrantedByUserGroupId">
+        delete from t_granted where usergroup_id=#{groupId}
+    </delete>
+</mapper>

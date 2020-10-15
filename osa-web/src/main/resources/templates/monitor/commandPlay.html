@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>命令回放</title>
+    <link rel="stylesheet" th:href="@{/js/plugins/asciinema/asciinema-player.css}" />
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+</head>
+
+<body>
+    <div id="ch" style="font-size: 12px;position: absolute;width: 1ch;"></div>
+    <div id="asciinema_player" style="position:absolute;width:100%;height:100%;overflow:auto;background-color:#121314;font-size: 0"></div>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/plugins/vue.js}"></script>
+    <script th:src="@{/js/plugins/asciinema/asciinema-player.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/commandPlay.js}"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,63 @@
+/*  */
+.echars-box .echars-common .pie-box {
+    width: 800px;
+    height: 100%;
+    margin: 0 auto;
+    position: relative;
+}
+
+#resource-pie {
+    height: 100%;
+    width: 100%;
+}
+
+
+.center-num {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1000;
+    color: #999;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    margin-left: 10px;
+}
+
+.center-num span {
+    font-size: 48px;
+    color: #fff;
+
+}
+.gd-hoverbox.gd-hoverbox-bottom {
+    padding: 10px 0 0 10px;
+}
+
+.echars-box{
+    height: 100%;
+}
+
+.gd-tab-horizontal>div.gd-tab-content .gd-tab-item{
+    padding: 0;
+}
+.table-box {
+    height: calc(55% - 10px);
+}
+/**
+tab切换颜色覆盖 后期可提出到reportCommon.css 中
+ */
+.gd-tab-horizontal>ul.gd-tab-bar li.gd-tab-li-active span::after{
+    background: #273340;
+}
+.gd-tab-horizontal>ul.gd-tab-bar li.gd-tab-li-active span{
+    background: #273340;
+    color:#fff;
+}
+.gd-tab-horizontal>ul.gd-tab-bar{
+    background: #232D39;
+}
+
+.gd-tab-horizontal>ul.gd-tab-bar li.gd-tab-li>span:after{
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+

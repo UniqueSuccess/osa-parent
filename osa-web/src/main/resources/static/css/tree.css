@@ -1,0 +1,24 @@
+.marginControl {
+  margin-left: 8px;
+  margin-top: 20px;
+  margin-right: 8px;
+}
+.fl {
+  float: left;
+  width: 50%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.fr {
+  float: right;
+  width: 50%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+button {
+  width: 100px;
+  height: 20px;
+}
+.clearfloat {
+  clear: both;
+}

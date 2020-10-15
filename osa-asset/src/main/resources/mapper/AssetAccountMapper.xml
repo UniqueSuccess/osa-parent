@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.asset.mapper.AssetAccountMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.asset.entity.AssetAccount">
+        <id column="id" property="id"/>
+        <result column="asset_id" property="assetId"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="trusteeship" property="trusteeship"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, asset_id, username, password, trusteeship
+    </sql>
+
+    <select id="countAssetAccountsInPage" parameterType="map" resultType="java.lang.Integer">
+        select count(id) from t_asset_account aa
+        <where>
+            <if test="assetId != null">
+                and aa.asset_id=#{assetId}
+            </if>
+            <if test="searchStr != null">
+                and aa.name like #{searchStr}
+            </if>
+        </where>
+    </select>
+
+    <select id="getAssetAccountsInPage" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_asset_account aa
+        <where>
+            <if test="assetId != null">
+                and aa.asset_id=#{assetId}
+            </if>
+            <if test="searchStr != null">
+                and aa.name like #{searchStr}
+            </if>
+        </where>
+        <if test="orderColumn != null and orderType != null">
+            ORDER BY #{orderColumn} #{orderType}
+        </if>
+        <if test="start != null and length != null">
+            limit #{start} , #{length}
+        </if>
+    </select>
+
+    <select id="getAccountListByAssetGroupId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT
+            a.id AS assetId,
+            a.`name` AS assetName,
+            a.ip AS assetIp,
+            aa.username,
+            atp.`name` AS assetTypeName,
+            ag.`name` AS assetGroupName,
+            (
+                CASE aa.trusteeship
+                WHEN 1 THEN
+                    '托管'
+                ELSE
+                    '未托管'
+                END
+            ) AS trusteeshipName
+        FROM
+            t_asset_account aa
+        LEFT JOIN t_asset a ON aa.asset_id = a.id
+        LEFT JOIN t_asset_type atp ON atp.id = a.type
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        LEFT JOIN t_assetgroup ag ON aag.assetgroup_id = ag.id
+        WHERE ag.id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,61 @@
+.gd-datepicker-show-ranges {
+  float: left;
+  text-align: left;
+  margin: 0;
+  width: 200px;
+}
+.gd-datepicker-show-ranges .gd-datepicker-ranges {
+  float: left;
+}
+.gd-datepicker-show-ranges .gd-datepicker-ranges ul {
+  width: 140px;
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+}
+.gd-datepicker-show-ranges .gd-datepicker-ranges li.active {
+  background-color: #08c;
+  color: #fff;
+}
+.gd-datepicker-show-ranges .gd-datepicker-ranges li {
+  font-size: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.gd-datepicker-show-ranges .gd-datepicker-main,
+.gd-datepicker-show-ranges .gd-datepicker-timediv,
+.gd-datepicker-show-ranges .gd-datepicker-footer {
+  display: none;
+  max-width: 270px;
+}
+.gd-datepicker-show-ranges .gd-datepicker-main-list-0 {
+  float: left;
+}
+.gd-datepicker-show-ranges .gd-datepicker-main-list-1 {
+  float: right;
+}
+.gd-datepicker-show-ranges .gd-datepicker-footer {
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  width: 139px;
+}
+.gd-datepicker-show-ranges > .gd-datepicker-timediv {
+  float: right;
+}
+.gd-datepicker.gd-datepicker-show-calendar .gd-datepicker-main,
+.gd-datepicker.gd-datepicker-show-calendar .gd-datepicker-timediv,
+.gd-datepicker.gd-datepicker-show-calendar .gd-datepicker-footer {
+  display: block;
+  max-width: 270px;
+}
+.gd-datepicker-ranges-wraps {
+  width: 697px;
+  height: 385px;
+}
+.gd-datepicker-ranges-wraps .gd-datepicker-ranges {
+  height: 100%;
+  width: 200px;
+  border-right: 1px solid #ddd;
+}

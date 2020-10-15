@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/js/plugins/asciinema/asciinema-player.css}" />
+    <link rel="stylesheet" th:href="@{/css/monitorHistory.css}" />
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+    <div class="gd-right-content" id="contentDiv">
+        <gd-toolbar :config="toolbarConfig"></gd-toolbar>
+        <div class="table-box">
+            <gd-table :config="tableConfig"></gd-table>
+        </div>
+    </div>
+    <script type="text/html" id="audit_layer">
+        <div id="audit_app" class="audit-app" v-cloak>
+            <div class="gd-iconinput searchbox" v-show="curIndex==0">
+                <input type="text" @keydown.enter="tableReload($event)">
+                <i class="icon-search" @click="tableReload($event)"></i>
+            </div>
+            <div class="commandPlay" @click="commandPlay"><span class="icon-play" :disabled="!hasCommand"></span></div>
+            <!-- <div class="gd-iconinput searchbox" v-show="curIndex==1">
+                <input type="text" @keydown.enter="tableReload($event)">
+                <i class="icon-search" @click="tableReload($event)"></i>
+            </div>
+            <div class="gd-iconinput searchbox" v-show="curIndex==2">
+                <input type="text" @keydown.enter="tableReload($event)">
+                <i class="icon-search" @click="tableReload($event)"></i>
+            </div> -->
+            <gd-tab @change="tabChange">
+                <gd-tab-item label="命令审计">
+                    <gd-table :config="commandConfig"></gd-table>
+                </gd-tab-item>
+            </gd-tab>
+        </div>
+    </script>
+    <script id="temp_commandPlay" type="text/html">
+        <div id="asciinema_player" style="position:absolute;font-size: 0"></div>
+    </script>
+    <script th:src="@{/js/plugins/vue.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/plugins/asciinema/asciinema-player.js}"></script>
+    <script th:src="@{/js/monitorHistory.js}"></script>
+
+</body>
+
+</html>

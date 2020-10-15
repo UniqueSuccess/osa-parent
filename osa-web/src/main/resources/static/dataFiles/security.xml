@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<security>
+    <!-- 配置不过滤的资源（静态资源） -->
+    <http pattern="/login" security="none"/>
+    <http pattern="/logout" security="none"/>
+    <http pattern="/loginValidate" security="none"/>
+    <http pattern="/user/checkUserLogonMethodByUsername/**" security="none"/>
+    <http pattern="/client/**" security="none"/>
+    <http pattern="/css/**" security="none"/>
+    <http pattern="/js/**" security="none"/>
+    <http pattern="/data/**" security="none"/>
+    <http pattern="/gdui/**" security="none"/>
+    <http pattern="/images/**" security="none"/>
+    <!-- swagger start-->
+    <http pattern="/swagger*" security="none"/>
+    <http pattern="/swagger*/**" security="none"/>
+    <http pattern="/webjars/**" security="none"/>
+    <http pattern="/v2/**" security="none"/>
+    <!-- swagger end-->
+    <!-- coco server start-->
+    <http pattern="/api/terminal/**" security="none"/>
+    <http pattern="/api/users/**" security="none"/>
+    <http pattern="/api/perms/**" security="none"/>
+    <!-- coco server end-->
+    <http pattern="/session/remoteapp/**" security="none"/>
+    <!-- 管控平台信息 -->
+    <http pattern="/system/systemSet/platform" security="none"/>
+    <!-- 获取系统名称 -->
+    <http pattern="/system/systemSet/platform/systemName" security="none"/>
+    <!-- client调用-->
+    <http pattern="/onlineSession/**" security="none"/>
+    <http pattern="/user/getUserStat" security="none"/>
+    <http pattern="/strategy/getPolicy" security="none"/>
+    <!--Test Start-->
+    <!--Test End-->
+</security>

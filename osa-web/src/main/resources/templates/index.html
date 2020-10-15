@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/homeIndex.css}" />
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/echarts/echarts.min.js}"></script>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+    <div class="gd-right-content" id="contentDiv" v-cloak>
+        <div class="home-box">
+            <!-- 分三列吧 -->
+            <div class="column">
+                <div class="top-cell">
+                    <div class="deepblue-box">
+                        <p>用户总数</p>
+                        <div>
+                            <span></span>
+                            <span>{{userNums}}</span>
+                        </div>
+                    </div>
+                    <div class="blue-box">
+                        <p>资源总数</p>
+                        <div>
+                            <span></span>
+                            <span>{{assetNums}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="cell center-cell">
+                    <div style="overflow: hidden;">
+                        <p style="float: left;">本周运维次数</p>
+                        <ul class="opera-legend">
+                            <li class="host-bgcolor"></li>
+                            <li>主机</li>
+                            <li class="net-bgcolor"></li>
+                            <li>网络设备</li>
+                            <li class="sql-bgcolor"></li>
+                            <li>数据库</li>
+                            <li class="app-bgcolor"></li>
+                            <li>应用</li>
+                        </ul>
+                    </div>
+                    <div class="echars-box" style="position: relative;">
+                        <div id="opera_num"></div>
+                    </div>
+                </div>
+                <div class="cell bottom-cell">
+                    <p>活跃账号TOP5</p>
+                    <div class="echars-box">
+                        <div id="active_account">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="top-cell">
+                    <div class="green-box">
+                        <p>在线用户</p>
+                        <div>
+                            <span></span>
+                            <span>{{userOnlineNums}}</span>
+                        </div>
+                    </div>
+                    <div class="gray-box">
+                        <p>在线会话</p>
+                        <div>
+                            <span></span>
+                            <span>{{sessionOnlineNums}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="cell center-cell">
+                    <p>资源数量</p>
+                    <div class="echars-box">
+                        <div id="resource_num"></div>
+                    </div>
+                </div>
+                <div class="cell bottom-cell">
+                    <p>资源运维TOP5</p>
+                    <div class="echars-box">
+                        <div id="resource_operate">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="top-cell">
+                    <div class="no-right" style="width:50%">
+                        <div class="top-center-box">
+                            <div>
+                                <span class="shenpitalk"></span>
+                                <span>{{approvedNums}}</span><br>
+                            </div>
+                            <div class="shenpi">已审批</div>
+                        </div>
+                    </div>
+                    <div class="no-left" style="width:50%">
+                        <div class="top-center-box" style="border: 0;">
+                            <div>
+                                <span class="shenpicommand"></span>
+                                <span>{{unApprovedNums}}</span>
+                            </div>
+                            <div class="shenpi">待审批</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cell center-cell">
+                    <p>最近运维记录</p>
+                    <div class="echars-box operanote" style="position: relative">
+                        <i class="gd-none-data gd-home-hide"></i>
+                        <ul>
+                            <li v-for="tab in operateRecord">
+                                <div><span class="username">{{tab.name}}</span> 登录了 {{tab.ip}} ({{tab.source}})</div>
+                                <div>{{tab.time}}</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="cell bottom-cell">
+                    <p>实时会话</p>
+                    <div class="echars-box">
+                        <gd-table :config="tableConfig"></gd-table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/homeIndex.js}"></script>
+</body>
+
+</html>

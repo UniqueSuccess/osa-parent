@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/logList.css}" />
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+    <div class="gd-right-content" id="contentDiv">
+        <div class="allDataBox">
+            <div class="conditionBox">
+                <gd-toolbar :config="toolbarConfig"></gd-toolbar>
+                <gd-recentpicker placeholder="请选择" :config="recentPickerConfig"></gd-recentpicker>
+            </div>
+            <gd-tab style="height:100%">
+                <gd-tab-item label="操作">
+                    <div class="table-box">
+                        <gd-table :config="operateTableConfig"></gd-table>
+                    </div>
+                </gd-tab-item>
+                <gd-tab-item label="授权">
+                    <div class="table-box">
+                        <gd-table :config="authTableConfig"></gd-table>
+                    </div>
+                </gd-tab-item>
+                <gd-tab-item label="审批">
+                    <div class="table-box">
+                        <gd-table :config="approvalTableConfig"></gd-table>
+                    </div>
+                </gd-tab-item>
+                <gd-tab-item label="策略">
+                    <div class="table-box">
+                        <gd-table :config="strategyTableConfig"></gd-table>
+                    </div>
+                </gd-tab-item>
+                <gd-tab-item label="运维">
+                    <div class="table-box">
+                        <gd-table :config="operationTableConfig"></gd-table>
+                    </div>
+                </gd-tab-item>
+            </gd-tab>
+        </div>
+    </div>
+    <script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/logList.js}"></script>
+</body>
+
+</html>

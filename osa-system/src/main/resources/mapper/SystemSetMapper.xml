@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.system.mapper.SystemSetMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.system.entity.SystemSet">
+        <result column="code" property="code" />
+        <result column="content" property="content" />
+        <result column="type" property="type" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        code, content, type, update_time
+    </sql>
+
+    <select id="getPlatform" resultType="java.util.Map">
+		SELECT
+		code,content,type FROM
+		`t_system_set` t WHERE t.`code` =
+		#{code,jdbcType=VARCHAR}
+	</select>
+    <delete id="deleteSystemSet">
+		delete from t_system_set where code =
+		#{code,jdbcType=VARCHAR}
+	</delete>
+
+    <insert id="addSystemSet" parameterType="com.goldencis.osa.system.entity.SystemSet">
+        insert into t_system_set
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null">
+                code,
+            </if>
+            <if test="content != null">
+                content,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="content != null">
+                #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updatePlatformJson" parameterType="java.lang.String">
+        update t_system_set set content=#{json} where code='Platform'
+    </update>
+    <update id="updateLogServer">
+        update t_system_set set content=#{content} where code='LogServer'
+    </update>
+    <update id="updateMailConfig">
+        update t_system_set set content=#{content} where code='MailConfig'
+    </update>
+</mapper>

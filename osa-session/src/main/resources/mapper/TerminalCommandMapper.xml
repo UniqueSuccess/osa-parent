@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.session.mapper.TerminalCommandMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.session.entity.TerminalCommand">
+        <id column="id" property="id" />
+        <result column="user" property="user" />
+        <result column="asset" property="asset" />
+        <result column="system_user" property="systemUser" />
+        <result column="input" property="input" />
+        <result column="output" property="output" />
+        <result column="session" property="session" />
+        <result column="status" property="status" />
+        <result column="approve_id" property="approveId" />
+        <result column="timestamp" property="timestamp" />
+        <result column="org_id" property="orgId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user, asset, system_user, input, output, session, status, approve_id, timestamp, org_id
+    </sql>
+
+    <select id="queryCommandList" parameterType="map" resultMap="BaseResultMap">
+        select
+        status, input, timestamp
+        from t_terminal_command
+        where session = #{session}
+        <if test="searchStr != null and searchStr != ''">
+            and input LIKE CONCAT('%',#{searchStr},'%')
+        </if>
+
+        order by timestamp desc
+        <if test="(start != null and start != '') or (length != null and length != '')">
+            limit ${start}, ${length}
+        </if>
+    </select>
+
+    <select id="queryCommandCount" parameterType="map" resultType="java.lang.Integer">
+        select
+        count(*)
+        from t_terminal_command
+        where session = #{session}
+        <if test="searchStr != null and searchStr != ''">
+            and  input LIKE CONCAT('%',#{searchStr},'%')
+        </if>
+    </select>
+
+    <select id="countCommandsInPage" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM t_terminal_command
+        <where>
+            <if test="searchStr != null">
+                AND input LIKE #{searchStr}
+            </if>
+            <if test="sessionId != null">
+                AND session = #{sessionId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getCommandsInPage" resultType="com.goldencis.osa.session.entity.TerminalCommand">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM t_terminal_command
+        <where>
+            <if test="searchStr != null">
+                AND input LIKE #{searchStr}
+            </if>
+            <if test="sessionId != null">
+                AND session = #{sessionId}
+            </if>
+        </where>
+        <if test="orderType == 'desc'">
+            ORDER BY timestamp DESC
+        </if>
+        <if test="orderType == 'asc'">
+            ORDER BY timestamp ASC
+        </if>
+        LIMIT #{start}, #{length}
+    </select>
+
+    <select id="getCommandReportChart" parameterType="map" resultType="java.util.Map">
+        SELECT COUNT(*) AS num, status FROM `t_terminal_command` WHERE 1=1
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and TIMESTAMP &gt;= #{params.startTime} and TIMESTAMP &lt; #{params.endTime}
+        </if>
+        GROUP BY STATUS
+    </select>
+
+    <select id="getCommandReportCount" parameterType="map" resultType="java.lang.Long">
+        SELECT COUNT(*) AS num FROM (
+        SELECT
+        a.input,
+        a.asset,
+        d.ip,
+        a.`system_user` account,
+        c.username,
+        c.name truename,
+        e.`name` typename,
+        GROUP_CONCAT(g.`name`) groupname
+        FROM
+        (SELECT a.* FROM `t_terminal_command` a WHERE 1=1
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and a.timestamp &gt;= #{params.startTime} and a.timestamp &lt; #{params.endTime}
+        </if>
+        <if test="params.status != null and params.status != ''">
+            and status in (${params.status})
+        </if>
+        and a.status > 2
+        ) a
+        LEFT JOIN `t_terminal_session` b
+        ON a.session = b.id
+        LEFT JOIN `t_user` c
+        ON a.user = c.guid
+        LEFT JOIN `t_asset` d
+        ON b.`asset_id` = d.`id`
+        LEFT JOIN `t_asset_type` e
+        ON d.`type` = e.`id`
+        LEFT JOIN `t_user_usergroup` f
+        ON f.`user_guid` = c.`guid`
+        LEFT JOIN `t_usergroup` g
+        ON f.`usergroup_id` = g.`id`
+        GROUP BY a.`id`
+        ) fin
+        WHERE 1=1
+        <if test="params.searchStr != null and params.searchStr != ''">
+            and concat(fin.input, fin.asset, fin.ip, fin.account, IFNULL(fin.username, ''), IFNULL(fin.truename, ''), fin.typename, fin.groupname) like concat('%', #{params.searchStr}, '%')
+        </if>
+    </select>
+
+    <select id="getCommandReportList" parameterType="map" resultType="com.goldencis.osa.session.entity.CommandEntity">
+        SELECT fin.* FROM (
+        SELECT
+        a.input,
+        a.status,
+        FROM_UNIXTIME(a.`timestamp`, '%Y-%m-%d %H:%i:%s') timestamp,
+        a.asset,
+        e.`name` typename,
+        d.ip,
+        a.`system_user` account,
+        b.asset_id,
+        c.username,
+        c.name truename,
+        GROUP_CONCAT(g.`name`) groupname
+        FROM
+        (SELECT a.* FROM `t_terminal_command` a WHERE 1=1
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and a.timestamp &gt;= #{params.startTime} and a.timestamp &lt; #{params.endTime}
+        </if>
+        <if test="params.status != null and params.status != ''">
+            and a.status in (${params.status})
+        </if>
+        and a.status > 2
+        ) a
+        LEFT JOIN `t_terminal_session` b
+        ON a.session = b.id
+        LEFT JOIN `t_user` c
+        ON a.user = c.guid
+        LEFT JOIN `t_asset` d
+        ON b.`asset_id` = d.`id`
+        LEFT JOIN `t_asset_type` e
+        ON d.`type` = e.`id`
+        LEFT JOIN `t_user_usergroup` f
+        ON f.`user_guid` = c.`guid`
+        LEFT JOIN `t_usergroup` g
+        ON f.`usergroup_id` = g.`id`
+        GROUP BY a.`id`
+        order by ${params.orderColumn} ${params.orderType}
+        ) fin
+        WHERE 1=1
+        <if test="params.searchStr != null and params.searchStr != ''">
+            and concat(fin.input, fin.asset, fin.ip, fin.account, IFNULL(fin.username, ''), IFNULL(fin.truename, ''), fin.typename, fin.groupname) like concat('%', #{params.searchStr}, '%')
+        </if>
+        limit ${params.start}, ${params.length}
+    </select>
+</mapper>

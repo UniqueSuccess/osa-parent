@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.core.mapper.PermissionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.core.entity.Permission">
+        <id column="id" property="id" />
+        <result column="resource_type" property="resourceType" />
+        <result column="resource_id" property="resourceId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, resource_type, resource_id
+    </sql>
+
+    <select id="findUserPermissionsByResourceType" resultType="com.goldencis.osa.core.entity.Permission">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM t_permission p
+        WHERE p.id IN (
+                SELECT rp.permission_id
+                FROM t_role_permission rp
+                WHERE rp.role_guid IN (
+                        SELECT ur.role_guid
+                        FROM t_user_role ur
+                        WHERE ur.user_guid = #{user.guid}
+                )
+        ) AND p.resource_type = #{resourceType}
+    </select>
+
+    <select id="findPermissionListByRoleGuid" resultType="com.goldencis.osa.core.entity.Permission">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM t_permission p
+        LEFT JOIN t_role_permission rp ON rp.permission_id = p.id
+        WHERE rp.role_guid = #{guid}
+    </select>
+
+    <select id="findPermissionListByOperationCode" resultType="com.goldencis.osa.core.entity.Permission">
+        SELECT p.id
+        FROM t_permission p
+        WHERE p.resource_type = 2 AND p.resource_id IN (
+                        SELECT ot.id
+                        FROM t_operation ot
+                        WHERE ot.code regexp #{code}
+        )
+    </select>
+
+</mapper>

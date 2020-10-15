@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/reportCommon.css}" />
+    <link rel="stylesheet" th:href="@{/css/reportAction.css}" />
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/echarts/echarts.min.js}"></script>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+    <div class="gd-right-content" id="contentDiv">
+        <gd-tab style="height: 45%;padding-top: 10px;background: #232D39">
+            <gd-tab-item label="行为审计">
+                <div class="echars-box">
+                    <div class="search-line">
+                        <gd-toolbar :config="toolbarConfig">
+                            <gd-recentpicker placeholder="最近7天" :config="recentRangePickerConfig" class="time-picker" slot="right"></gd-recentpicker>
+                        </gd-toolbar>
+                    </div>
+                    <div class="echars-common">
+                        <div class="pie-box">
+                            <div id="resource-pie"></div>
+                            <div class="center-num"><span class="pie_number"></span> 个</div>
+                        </div>
+                    </div>
+                </div>
+            </gd-tab-item>
+        </gd-tab>
+        <div class="table-box">
+            <gd-table :config="tableConfig"></gd-table>
+        </div>
+    </div>
+    <!-- 导出 -->
+    <script type="text/html" id="export_window">
+        <form action="" class="export-box" id="export_box">
+            <div class="line">
+                <label class="gd-radio">
+                    <input type="radio" value="Radio1" name="radio" :checked="isNowPage" @change="radioChange(1)">
+                    <i></i>
+                    当前页
+                </label>
+            </div>
+            <div class="line">
+                <label class="gd-radio">
+                    <input type="radio" value="Radio1" name="radio" @change="radioChange(2)">
+                    <i></i>
+                </label>
+                从 <input type="text" class="gd-input start-page" :disabled="isNowPage==1" gd-validate="required int minValue maxValue" gdv-minvalue="1" gdv-maxvalue="10000"> 至 <input type="text" class="gd-input end-page" :disabled="isNowPage==1" gd-validate="required int minValue maxValue" gdv-minvalue="1" gdv-maxvalue="10000"> 页
+                <span class="color-help"><i class="icon-help"></i> 单次最多10000页</span>
+            </div>
+        </form>
+    </script>
+    <script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/reportExport.js}"></script>
+    <script th:src="@{/js/reportAction.js}"></script>
+</body>
+
+</html>

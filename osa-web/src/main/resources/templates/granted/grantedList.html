@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <script src="/js/resource.js"></script> -->
+    <!-- <link rel="stylesheet" href="/css/table.css"> -->
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/grandlist.css}" />
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+    <div class="gd-right-content" id="app">
+        <gd-toolbar :config="toolbarConfig"></gd-toolbar>
+        <div class="table-box">
+            <gd-table :config="tableConfig"></gd-table>
+        </div>
+        <div class="gd-none">
+            <div class="tree-box" id="tree_box">
+                <gd-tree :config='treeConfig'></gd-tree>
+            </div>
+        </div>
+    </div>
+    <script type="text/html" id="temp_config_layer">
+        <div id="config_app" class="gd-padding-sm" v-cloak>
+            <div class="gd-padding-xs">
+                <label class="config-label">设备类型</label>
+                <input type="text" class="gd-input gd-input-lg" disabled v-model="assettypeIcon">
+            </div>
+            <div v-if="!batchData">
+                <div class="gd-padding-xs">
+                    <label class="config-label">设备名称</label>
+                    <input type="text" class="gd-input gd-input-lg" disabled v-model="assetName">
+                </div>
+                <div class="gd-padding-xs">
+                    <label class="config-label">设备IP</label>
+                    <input type="text" class="gd-input gd-input-lg" disabled v-model="assetIp">
+                </div>
+                <div class="gd-padding-xs">
+                    <label class="config-label">账号</label>
+                    <input type="text" class="gd-input gd-input-lg" disabled v-model="accountName">
+                </div>
+            </div>
+            <div v-if="assetType=='linux'">
+                <div class="gd-padding-xs">
+                    <label class="config-label">登录方式</label>
+                    <label class="gd-radio"><input type="radio" value="web" name="logonToolsType" v-model="linux.logonToolsType"><i></i>Web</label>
+                    <label class="gd-radio gd-margin-left-sm"><input type="radio" value="client" name="logonToolsType" v-model="linux.logonToolsType" @change="linuxLogonToolsTypeChange"><i></i>客户端</label>
+                </div>
+                <div class="gd-padding-xs" v-show="linux.logonToolsType=='client'">
+                    <label class="config-label">登录工具</label>
+                    <gd-select class="gd-select-lg" placeholder="请选择" v-model="linux.logonTools">
+                        <gd-option value="XShell">XShell</gd-option>
+                        <gd-option value="SecureCRT">SecureCRT</gd-option>
+                        <gd-option value="Putty">Putty</gd-option>
+                    </gd-select>
+                </div>
+                <div class="gd-padding-xs" v-show="linux.logonToolsType=='client'">
+                    <label class="config-label">打开形式</label>
+                    <gd-select class="gd-select-lg" placeholder="请选择" v-model="linux.openType">
+                        <gd-option value="tab">选项卡</gd-option>
+                        <gd-option value="window">独立窗口</gd-option>
+                    </gd-select>
+                </div>
+                <div class="gd-padding-xs">
+                    <label class="config-label">登录界面</label>
+                    <gd-select class="gd-select-lg" placeholder="请选择" v-model="linux.logonMethod" @change="linuxLogonMethodChange">
+                        <gd-option value="character">字符</gd-option>
+                        <gd-option value="graphical" v-if="linux.logonToolsType=='web'">图形</gd-option>
+                    </gd-select>
+                </div>
+                <div class="gd-padding-xs" v-if="linux.logonMethod=='character'">
+                    <label class="config-label">协议</label>
+                    <label class="gd-radio gd-margin-left-sm"><input type="radio" value="ssh" name="protocol" v-model="linux.protocol" @change="protocolChange($event)"><i></i>SSH</label>
+                </div>
+                <div class="gd-padding-xs" v-if="linux.logonMethod=='graphical'">
+                    <label class="config-label">协议</label>
+                    <label class="gd-radio"><input type="radio" value="vnc" name="protocol" v-model="linux.protocol" @change="protocolChange($event)"><i></i>VNC</label>
+                    <label class="gd-radio gd-margin-left-sm"><input type="radio" value="xwindow" name="protocol" v-model="linux.protocol" @change="protocolChange($event)"><i></i>XWindow</label>
+                </div>
+                <div class="gd-padding-xs">
+                    <label class="config-label">端口</label>
+                    <input type="text" class="gd-input gd-input-lg" gd-validate="required port" v-model="linux.port">
+                </div>
+            </div>
+            <div v-else-if="assetType=='windows'">
+                <div class="gd-padding-xs">
+                    <label class="config-label">登录方式</label>
+                    <gd-select class="gd-select-lg" placeholder="请选择" v-model="windows.logonMethod">
+                        <gd-option value="graphical">图形</gd-option>
+                    </gd-select>
+                </div>
+                <div class="gd-padding-xs">
+                    <label class="config-label">协议</label>
+                    <label class="gd-radio"><input type="radio" value="rdp" name="protocol" v-model="windows.protocol" @change="protocolChange($event)"><i></i>RDP</label>
+                    <label class="gd-radio gd-margin-left-sm"><input type="radio" value="vnc" name="protocol" v-model="windows.protocol" @change="protocolChange($event)"><i></i>VNC</label>
+                </div>
+                <div class="gd-padding-xs">
+                    <label class="config-label">端口</label>
+                    <input type="text" class="gd-input gd-input-lg" gd-validate="required port" v-model="windows.port">
+                </div>
+                <div class="gd-padding-xs">
+                    <label class="config-label">显示分辨率</label>
+                    <gd-select class="gd-select-lg" placeholder="请选择" v-model="windows.resolution">
+                        <gd-option value="fullScreen">全屏</gd-option>
+                        <gd-option value="800x600">800x600</gd-option>
+                        <gd-option value="1024x768">1024x768</gd-option>
+                        <gd-option value="1280x720">1280x720</gd-option>
+                        <gd-option value="1280x768">1280x768</gd-option>
+                        <gd-option value="1280x800">1280x800</gd-option>
+                        <gd-option value="1366x768">1366x768</gd-option>
+                        <gd-option value="1440x900">1440x900</gd-option>
+                    </gd-select>
+                </div>
+                <div class="gd-padding-xs" v-show="windows.protocol=='rdp'">
+                    <label class="config-label">共享本地驱动器</label>
+                    <div class="driver-box">
+                        <div class="gd-padding-xs" v-for="name,key in driverList">
+                            <label class="gd-checkbox"><input type="checkbox" :value="key" name="shareDriver" v-model="shareDriverArr"><i></i>{{key}}:{{name}}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="gd-padding-xs" v-show="windows.protocol=='rdp'">
+                    <label class="config-label">共享剪切版</label>
+                    <label class="gd-switch"><input type="checkbox" name="shareShearPlate" v-model="windows.shareShearPlate"><i></i></label>
+                </div>
+            </div>
+            <div v-else-if="assetType=='remoteApp'">
+                <div class="gd-padding-xs">
+                    <label class="config-label">应用程序发布器</label>
+                    <input type="text" class="gd-input gd-input-lg" disabled v-model="remoteApp.publishName">
+                </div>
+                <div class="gd-padding-xs">
+                    <label class="config-label">连接工具</label>
+                    <input type="text" class="gd-input gd-input-lg" disabled v-model="remoteApp.ssoRuleName">
+                </div>
+                <div class="gd-padding-xs">
+                    <label class="config-label">协议</label>
+                    <label class="gd-radio gd-margin-left-sm"><input type="radio" value="rdp" name="protocol" v-model="remoteApp.protocol" @change="protocolChange($event)"><i></i>RDP</label>
+                </div>
+                <div class="gd-padding-xs">
+                    <label class="config-label">端口</label>
+                    <input type="text" class="gd-input gd-input-lg" gd-validate="required port" v-model="remoteApp.port">
+                </div>
+            </div>
+            <div v-else-if="assetType=='net'"></div>
+        </div>
+    </script>
+    <script th:src="@{/js/plugins/vue.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/grandlist.js}"></script>
+</body>
+
+</html>

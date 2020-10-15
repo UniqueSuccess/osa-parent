@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.system.mapper.SystemBlackWhiteMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.system.entity.SystemBlackWhite">
+        <id column="id" property="id" />
+        <result column="type" property="type" />
+        <result column="user_guid" property="userGuid" />
+        <result column="username" property="username" />
+        <result column="user_ip" property="userIp" />
+        <result column="asset_ip" property="assetIp" />
+        <result column="create_by" property="createBy" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, type, user_guid, username, user_ip, asset_ip, create_by, create_time
+    </sql>
+
+</mapper>

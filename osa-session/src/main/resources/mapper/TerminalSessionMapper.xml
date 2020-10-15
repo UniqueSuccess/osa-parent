@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.session.mapper.TerminalSessionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.session.entity.TerminalSession">
+        <id column="id" property="id" />
+        <result column="user_username" property="userUsername" />
+        <result column="user_name" property="userName" />
+        <result column="remote_addr" property="remoteAddr" />
+        <result column="user_guid" property="userGuid" />
+        <result column="asset_name" property="assetName" />
+        <result column="asset_addr" property="assetAddr" />
+        <result column="asset_id" property="assetId" />
+        <result column="system_user" property="systemUser" />
+        <result column="login_from" property="loginFrom" />
+        <result column="is_finished" property="isFinished" />
+        <result column="is_blocking" property="isBlocking" />
+        <result column="has_replay" property="hasReplay" />
+        <result column="has_command" property="hasCommand" />
+        <result column="has_command_replay" property="hasCommandReplay" />
+        <result column="has_file" property="hasFile" />
+        <result column="date_start" property="dateStart" />
+        <result column="date_end" property="dateEnd" />
+        <result column="date_last_active" property="dateLastActive" />
+        <result column="org_id" property="orgId" />
+        <result column="protocol" property="protocol" />
+        <result column="terminal_id" property="terminalId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_username, user_name, remote_addr, user_guid, asset_name, asset_addr, asset_id, system_user, login_from, is_finished, is_blocking, has_replay, has_command_replay, has_command, has_file, date_start, date_end, date_last_active, org_id, protocol, terminal_id
+    </sql>
+
+    <select id="getMonitorList" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from t_terminal_session
+        where 1=1
+        <if test="finish != null and finish == '0'.toString()">
+            and is_finished = 0
+        </if>
+        <if test="finish != null and finish == '1'.toString()">
+            and (is_finished = 1 or is_finished = 2)
+        </if>
+        <if test="searchStr != null and searchStr != ''">
+            and  CONCAT(user_name, '#', user_username, '#', remote_addr, '#', asset_addr) LIKE CONCAT('%',#{searchStr},'%')
+        </if>
+        order by date_start desc
+        <if test="(start != null and start != '') or (length != null and length != '')">
+            limit ${start}, ${length}
+        </if>
+    </select>
+
+    <select id="getMonitorCount" parameterType="map" resultType="java.lang.Integer">
+        select
+        count(*)
+        from t_terminal_session
+        where 1=1
+        <if test="finish != null and finish == '0'.toString()">
+            and is_finished = 0
+        </if>
+        <if test="finish != null and finish == '1'.toString()">
+            and (is_finished = 1 or is_finished = 2)
+        </if>
+        <if test="searchStr != null and searchStr != ''">
+            and  CONCAT(user_name, '#', user_username, '#', remote_addr, '#', asset_addr) LIKE CONCAT('%',#{searchStr},'%')
+        </if>
+    </select>
+
+    <select id="getSessionsInPage" resultType="com.goldencis.osa.session.entity.TerminalSession">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM t_terminal_session
+        <where>
+            <if test="searchStr != null and searchStr != ''">
+                AND ( user_name LIKE #{searchStr}
+                    OR user_username LIKE #{searchStr}
+                    OR remote_addr LIKE #{searchStr}
+                    OR asset_addr LIKE #{searchStr})
+            </if>
+            <if test="isFinish != null">
+                AND is_finished = #{isFinish}
+            </if>
+            <if test="isBlockingList != null">
+                AND is_blocking IN
+                <foreach collection="isBlockingList" item="isBlocking" open="(" separator="," close=")">
+                    #{isBlocking}
+                </foreach>
+            </if>
+            <if test="protocolList != null">
+                AND protocol IN
+                <foreach collection="protocolList" item="protocol" open="(" separator="," close=")">
+                    #{protocol}
+                </foreach>
+            </if>
+        </where>
+
+        <if test="orderType == 'desc'">
+            ORDER BY date_start DESC
+        </if>
+        <if test="orderType == 'asc'">
+            ORDER BY date_start ASC
+        </if>
+        limit #{start}, #{length}
+    </select>
+
+    <select id="countSessionsInPage" resultType="java.lang.Integer">
+        SELECT
+            COUNT(1)
+        FROM t_terminal_session
+        <where>
+            <if test="searchStr != null and searchStr != ''">
+                AND ( user_name LIKE #{searchStr}
+                OR user_username LIKE #{searchStr}
+                OR remote_addr LIKE #{searchStr}
+                OR asset_addr LIKE #{searchStr})
+            </if>
+            <if test="isFinish != null">
+                AND is_finished = #{isFinish}
+            </if>
+            <if test="isBlockingList != null">
+                AND is_blocking IN
+                <foreach collection="isBlockingList" item="isBlocking" open="(" separator="," close=")">
+                    #{isBlocking}
+                </foreach>
+            </if>
+            <if test="protocolList != null">
+                AND protocol IN
+                <foreach collection="protocolList" item="protocol" open="(" separator="," close=")">
+                    #{protocol}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>

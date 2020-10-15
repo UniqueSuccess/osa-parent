@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.asset.mapper.GrantedMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.asset.entity.Granted">
+        <id column="id" property="id"/>
+        <result column="type" property="type"/>
+        <result column="assetgroup_id" property="assetgroupId"/>
+        <result column="asset_id" property="assetId"/>
+        <result column="account_id" property="accountId"/>
+        <result column="status" property="status"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="user_id" property="userId"/>
+        <result column="usergroup_id" property="usergroupId"/>
+        <result column="approve_id" property="approveId"/>
+        <result column="isdelete" property="isdelete"/>
+    </resultMap>
+
+    <resultMap id="grantDetailResultMap" type="com.goldencis.osa.asset.domain.GrantDetail">
+        <result column="status" property="status"/>
+        <result column="assetName" property="assetName"/>
+        <result column="assetIp" property="assetIp"/>
+        <result column="account" property="account"/>
+        <result column="assetType" property="assetType"/>
+        <result column="groupName" property="groupName"/>
+        <result column="trusteeship" property="trusteeship"/>
+        <result column="userGuid" property="userGuid"/>
+        <collection property="grantWays" ofType="com.goldencis.osa.asset.domain.GrantWay">
+            <result column="grantFrom" property="grantFrom"/>
+            <result column="grantTo" property="grantTo"/>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        g.id, g.type, g.assetgroup_id, g.asset_id, g.account_id, g.status, g.create_by, g.create_time, g.user_id, g.usergroup_id, g.approve_id, g.isdelete
+    </sql>
+
+    <!-- 根据用户guid获取授权设备账号 -->
+    <select id="findAccountIdsByUserGuid" resultType="java.lang.String">
+        SELECT g.account_id
+        FROM t_granted g
+        <where>
+            <if test="userGuid != null and userGuid !=''">
+                AND g.user_id = #{userGuid}
+            </if>
+            <if test="usergroupGuid != null and usergroupGuid !=''">
+                AND g.usergroup_id = #{usergroupGuid}
+            </if>
+            <if test="grantedType != null">
+                AND g.type = #{grantedType}
+            </if>
+            <if test="statusSets != null and statusSets.size()>0 ">
+                AND g.status in
+                <foreach collection="statusSets" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据用户guid获取授权设备组账号 -->
+    <select id="findAssetgroupIdsByUserGuid" resultType="java.lang.String">
+        SELECT g.assetgroup_id
+        FROM t_granted g
+        <where>
+            <if test="userGuid != null and userGuid !=''">
+                AND g.user_id = #{userGuid}
+            </if>
+            <if test="usergroupGuid != null and usergroupGuid !=''">
+                AND g.usergroup_id = #{usergroupGuid}
+            </if>
+            <if test="grantedType != null">
+                AND g.type = #{grantedType}
+            </if>
+            <if test="statusSets != null and statusSets.size()>0 ">
+                AND g.status in
+                <foreach collection="statusSets" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!-- 验证设备账号关联关系正确性 -->
+    <select id="checkAccountCorrect" parameterType="map" resultType="java.lang.Integer">
+        SELECT COUNT(aa.id) FROM t_asset_account aa
+        INNER JOIN t_asset a ON aa.asset_id=a.id
+        INNER JOIN t_asset_assetgroup aag ON aag.asset_id=a.id
+        INNER JOIN t_assetgroup ag ON ag.id=aag.assetgroup_id
+        <where>
+            <if test="accountId != null">
+                AND aa.id = #{accountId}
+            </if>
+            <if test="assetId != null">
+                AND a.id = #{assetId}
+            </if>
+            <if test="assetgroupId != null">
+                AND ag.id = #{assetgroupId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 验证设备账号 是否存在-->
+    <select id="checkAccountExist" parameterType="map" resultType="com.goldencis.osa.asset.entity.Granted">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM t_granted g
+        <where>
+            <if test="userGuid != null and userGuid !=''">
+                AND g.user_id = #{userGuid}
+            </if>
+            <if test="usergroupId != null and usergroupId !=''">
+                AND g.usergroup_id = #{usergroupId}
+            </if>
+            <if test="accountId != null  and accountId !=''">
+                AND g.account_id = #{accountId}
+            </if>
+            <if test="assetId != null and assetId !=''">
+                AND g.asset_id = #{assetId}
+            </if>
+            <if test="assetgroupId != null and assetgroupId !=''">
+                AND g.assetgroup_id = #{assetgroupId}
+            </if>
+            <if test="grantedType != null">
+                AND g.type = #{grantedType}
+            </if>
+            <if test="statusSets != null and statusSets.size()>0 ">
+                AND g.status in
+                <foreach collection="statusSets" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据用户guid 分页 获取授权设备账号 总数 -->
+    <select id="countAssestAccountsInPage" parameterType="map" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM t_granted g
+        LEFT JOIN t_asset a ON a.id = g.asset_id
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        LEFT JOIN t_asset_account ac ON ac.id = g.account_id
+        LEFT JOIN t_asset_type atp ON atp.id = a.type
+        <where>
+            <if test="userGuid != null  and userGuid !=''">
+                AND g.user_id = #{userGuid}
+            </if>
+            <if test="usergroupId != null  and usergroupId !=''">
+                AND g.usergroup_id = #{usergroupId}
+            </if>
+            <if test="grantedType != null">
+                AND g.type = #{grantedType}
+            </if>
+            <if test="statusSets != null and statusSets.size()>0 ">
+                AND g.status in
+                <foreach collection="statusSets" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="searchStr != null">
+                AND ( ag.name LIKE #{searchStr} OR a.name LIKE #{searchStr}
+                OR a.ip LIKE #{searchStr} OR ac.username LIKE #{searchStr}
+                OR atp.name LIKE #{searchStr})
+            </if>
+            <if test="startTime != null">
+                AND g.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND g.create_time &lt; #{endTime}
+            </if>
+        </where>
+
+    </select>
+
+    <!--  根据 用户guid 分页 获取授权设备账号  -->
+    <select id="getAssestAccountsInPage" parameterType="map" resultType="com.goldencis.osa.asset.entity.Granted">
+        SELECT
+        g.*,
+        ag.id AS assetgroupId,
+        ag.name AS assetgroupname,
+        a.name AS assetname,
+        a.ip AS assetip,
+        ac.username AS accountname,
+        atp.name AS assettypename,
+        ( CASE ac.trusteeship
+        WHEN 1
+        THEN '托管'
+        ELSE '未托管'
+        END ) AS trusteeship,
+        ( CASE g.status
+        WHEN 0
+        THEN '待审批'
+        WHEN 1
+        THEN '已授权'
+        END ) AS statusname
+        FROM t_granted g
+        LEFT JOIN t_asset a ON a.id = g.asset_id
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        LEFT JOIN t_asset_account ac ON ac.id = g.account_id
+        LEFT JOIN t_asset_type atp ON atp.id = a.type
+        <where>
+            <if test="userGuid != null  and userGuid !=''">
+                AND g.user_id = #{userGuid}
+            </if>
+            <if test="usergroupId != null and usergroupId !=''">
+                AND g.usergroup_id = #{usergroupId}
+            </if>
+            <if test="grantedType != null">
+                AND g.type = #{grantedType}
+            </if>
+            <if test="statusSets != null and statusSets.size()>0 ">
+                AND g.status in
+                <foreach collection="statusSets" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="searchStr != null">
+                AND ( ag.name LIKE #{searchStr} OR a.name LIKE #{searchStr}
+                OR a.ip LIKE #{searchStr} OR ac.username LIKE #{searchStr}
+                OR atp.name LIKE #{searchStr})
+            </if>
+            <if test="startTime != null">
+                AND g.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND g.create_time &lt; #{endTime}
+            </if>
+        </where>
+        ORDER BY g.create_time DESC
+        limit #{start} , #{length}
+    </select>
+
+    <!-- 根据用户guid获取 授权设备组  -->
+    <select id="countAssestgroupsInPage" parameterType="String" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM t_granted g
+        LEFT JOIN t_assetgroup ag ON ag.id = g.assetgroup_id
+        <where>
+            <if test="userGuid != null  and userGuid !=''">
+                AND g.user_id = #{userGuid}
+            </if>
+            <if test="usergroupId != null  and usergroupId !=''">
+                AND g.usergroup_id = #{usergroupId}
+            </if>
+            <if test="grantedType != null">
+                AND g.type = #{grantedType}
+            </if>
+            <if test="statusSets != null and statusSets.size()>0 ">
+                AND g.status in
+                <foreach collection="statusSets" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="searchStr != null">
+                AND ag.name LIKE #{searchStr}
+            </if>
+            <if test="startTime != null">
+                AND g.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND g.create_time &lt; #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!--  根据用户guid获取 授权设备组  分页-->
+    <select id="getAssestgroupsInPage" parameterType="map" resultType="com.goldencis.osa.asset.entity.Granted">
+        SELECT
+        g.*, ag.name AS assetgroupname,
+        ( CASE g.status
+        WHEN 0
+        THEN '待审批'
+        WHEN 1
+        THEN '已授权'
+        END ) AS statusname
+        FROM t_granted g
+        LEFT JOIN t_assetgroup ag ON ag.id = g.assetgroup_id
+        <where>
+            <if test="userGuid != null  and userGuid !=''">
+                AND g.user_id = #{userGuid}
+            </if>
+            <if test="usergroupId != null  and usergroupId !=''">
+                AND g.usergroup_id = #{usergroupId}
+            </if>
+            <if test="grantedType != null">
+                AND g.type = #{grantedType}
+            </if>
+            <if test="statusSets != null and statusSets.size()>0 ">
+                AND g.status in
+                <foreach collection="statusSets" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="searchStr != null">
+                AND ag.name LIKE #{searchStr}
+            </if>
+            <if test="startTime != null">
+                AND g.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND g.create_time &lt; #{endTime}
+            </if>
+        </where>
+        ORDER BY g.create_time DESC
+        limit #{start} , #{length}
+    </select>
+
+    <!-- 根据用户guid获取授权设备账号资源 -->
+    <select id="getUserGrantedAssestAccounts" parameterType="java.util.Map"
+            resultType="com.goldencis.osa.asset.entity.Granted">
+        SELECT * FROM t_granted g
+        <where>
+            <if test="userGuid != null  and userGuid !=''">
+                AND g.user_id = #{userGuid}
+            </if>
+            <if test="grantedTypeAssetAccount != null">
+                AND g.type = #{grantedTypeAssetAccount}
+            </if>
+            <if test="grantedStatus != null">
+                AND g.status = #{grantedStatus}
+            </if>
+            AND g.isdelete = 0
+        </where>
+    </select>
+
+    <!-- 根据用户guid 获取授权设备组(过滤应用程序发布器的设备) 允许应用程序发布器 (a.is_publish != 1 OR a.is_publish IS NULL) -->
+    <select id="getUserGrantedAssestgroups" parameterType="java.util.Map"
+            resultType="com.goldencis.osa.asset.entity.Asset">
+        SELECT a.*
+        FROM t_asset a
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        WHERE aag.assetgroup_id IN
+        ( SELECT g.assetgroup_id
+        FROM t_granted g
+        <where>
+            <if test="userGuid != null  and userGuid !=''">
+                AND g.user_id = #{userGuid}
+            </if>
+            <if test="grantedTypeAssetGroup != null">
+                AND g.type = #{grantedTypeAssetGroup}
+            </if>
+            <if test="grantedStatus != null">
+                AND g.status = #{grantedStatus}
+            </if>
+            AND g.isdelete = 0
+        </where>
+        )
+    </select>
+
+    <!-- 根据用户guid 获取用户组  授权设备账号 -->
+    <select id="getUsergroupGrantedAssestAccounts" parameterType="java.util.Map"
+            resultType="com.goldencis.osa.asset.entity.Granted">
+        SELECT *
+        FROM t_granted g
+        <where>
+            <if test="grantedTypeAssetAccount != null">
+                AND g.type = #{grantedTypeAssetAccount}
+            </if>
+            <if test="grantedStatus != null">
+                AND g.status = #{grantedStatus}
+            </if>
+            AND g.isdelete = 0
+        </where>
+        AND usergroup_id IN
+        ( SELECT uup.usergroup_id
+        FROM t_user t
+        LEFT JOIN t_user_usergroup uup ON uup.user_guid = t.guid
+        <where>
+            <if test="userGuid != null  and userGuid !=''">
+                AND t.guid = #{userGuid}
+            </if>
+        </where>
+        )
+    </select>
+
+    <!-- 根据用户guid 获取用户组  授权设备组的设备-->
+    <select id="getUsergroupGrantedAssestgroups" parameterType="java.util.Map"
+            resultType="com.goldencis.osa.asset.entity.Asset">
+        SELECT a.*
+        FROM t_asset a
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        WHERE aag.assetgroup_id IN
+        ( SELECT g.assetgroup_id
+        FROM t_granted g
+        <where>
+            <if test="grantedTypeAssetGroup != null">
+                AND g.type = #{grantedTypeAssetGroup}
+            </if>
+            <if test="grantedStatus != null">
+                AND g.status = #{grantedStatus}
+            </if>
+            AND g.isdelete = 0
+        </where>
+        AND usergroup_id IN
+        ( SELECT uup.usergroup_id
+        FROM t_user t
+        LEFT JOIN t_user_usergroup uup ON uup.user_guid = t.guid
+        <where>
+            <if test="userGuid != null  and userGuid !=''">
+                AND t.guid = #{userGuid}
+            </if>
+        </where>
+        ))
+    </select>
+
+    <!-- 根据设备id 获取 设备账号id-->
+    <select id="getAccountIdsByAssetId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT ac.id
+        FROM t_asset_account ac
+        WHERE  ac.asset_id  =  #{value}
+    </select>
+
+    <!-- 根据设备账号id集合 获取账号分页 总数-->
+    <select id="countGrantedSignUserInPage" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT count(ac.id)
+        FROM t_asset_account ac
+        LEFT JOIN t_asset a ON a.id = ac.asset_id
+        LEFT JOIN t_asset_type atp ON atp.id = a.type
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        <where>
+            <if test="accoutIdsSet != null and accoutIdsSet.size() !=0">
+                AND ac.id in
+                <foreach collection="accoutIdsSet" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="assetgroupId != null and assetgroupId !=''">
+                AND ag.tree_path LIKE CONCAT('%,',#{assetgroupId}, ',%')
+            </if>
+            <if test="assetId != null and assetId !=''">
+                AND a.id = #{assetId}
+            </if>
+            <if test="searchStr != null">
+                AND ( a.name LIKE #{searchStr} OR a.ip LIKE #{searchStr})
+            </if>
+            <if test="assetTypeIdsList != null and assetTypeIdsList.size() !=0">
+                AND atp.id in
+                <foreach collection="assetTypeIdsList" open="(" close=")" separator="," item="assetTypeItem">
+                    #{assetTypeItem}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据设备账号id集合 获取账号分页-->
+    <select id="getGrantedSignUserInPage" parameterType="java.util.Map"
+            resultType="com.goldencis.osa.asset.entity.GrantedSignUser">
+        SELECT
+        ag.id AS assetgroupId,
+        ag.name AS assetgroupName,
+        a.id AS assetId,
+        a.name AS assetName,
+        a.ip AS assetIp,
+        ac.id AS accountId,
+        ac.username AS accountName,
+        atp.id AS assettypeId,
+        atp.name AS assettypeName,
+        atp.icon AS assettypeIcon
+        FROM t_asset_account ac
+        LEFT JOIN t_asset a ON a.id = ac.asset_id
+        LEFT JOIN t_asset_type atp ON atp.id = a.type
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        <where>
+            <if test="accoutIdsSet != null and accoutIdsSet.size() !=0">
+                AND ac.id in
+                <foreach collection="accoutIdsSet" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="assetgroupId != null and assetgroupId !=''">
+                AND ag.tree_path LIKE CONCAT('%,',#{assetgroupId}, ',%')
+            </if>
+            <if test="assetId != null and assetId !=''">
+                AND a.id = #{assetId}
+            </if>
+            <if test="searchStr != null">
+                AND ( a.name LIKE #{searchStr} OR a.ip LIKE #{searchStr})
+            </if>
+            <if test="assetTypeIdsList != null and assetTypeIdsList.size() !=0">
+                AND atp.id in
+                <foreach collection="assetTypeIdsList" open="(" close=")" separator="," item="assetTypeItem">
+                    #{assetTypeItem}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY ac.id DESC
+        limit #{pageParams.start} , #{pageParams.length}
+    </select>
+
+    <!-- 判断用户是否有设备、设备账号权限 -->
+    <select id="checkUser4AssetAccout" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(a.id)
+        FROM t_asset_account ac
+        LEFT JOIN t_asset a ON a.id = ac.asset_id
+        <where>
+            <if test="accoutIdsSet != null  and accoutIdsSet.size() !=0">
+                AND ac.id in
+                <foreach collection="accoutIdsSet" open="(" close=")" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="assetId != null">
+                AND a.id = #{assetId}
+            </if>
+            <if test="assetAccountId != null">
+                AND ac.id = #{assetAccountId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 通用查询结果列 -->
+    <sql id="ApprovalFlowInfoGranted_Column_List">
+          g.id AS grantedId,
+          u.guid AS userId,
+          u.username AS userUsername,
+          u.name AS userName,
+          GROUP_CONCAT(ug.id SEPARATOR ',') AS usergroupIds,
+          GROUP_CONCAT(ug.name SEPARATOR ',') AS usergroupNames,
+          ag.id AS assetgroupId,
+          ag.name AS assetgroupName,
+          a.id AS assetId,
+          a.name AS assetName,
+          a.ip AS assetIp,
+          ac.id AS assetAccountId,
+          ac.username AS assetAccountName,
+          atp.name AS assettypeName,
+          atp.id AS assettypeId
+    </sql>
+
+    <!-- 用户：  授权设备账号  授权id 生成授权审批数据 -->
+    <select id="getApprovalFlowInfoGrantedByAssetAccountUserId" parameterType="java.lang.Integer"
+            resultType="com.goldencis.osa.approval.entity.ApprovalFlowInfoGranted">
+        SELECT
+        <include refid="ApprovalFlowInfoGranted_Column_List"></include>
+        FROM t_granted g
+        LEFT JOIN t_asset a ON a.id = g.asset_id
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        LEFT JOIN t_asset_account ac ON ac.id = g.account_id
+        LEFT JOIN t_asset_type atp ON atp.id = a.type
+        LEFT JOIN t_user u ON u.guid = g.user_id
+        LEFT JOIN t_user_usergroup uug ON uug.user_guid = g.user_id
+        LEFT JOIN t_usergroup ug ON ug.id = uug.usergroup_id
+        WHERE g.id = #{value} AND g.type = 3
+    </select>
+
+    <!-- 用户：  授权设备组 授权id 生成授权审批数据 -->
+    <select id="getApprovalFlowInfoGrantedByAssetgroupUserId" parameterType="java.lang.Integer"
+            resultType="com.goldencis.osa.approval.entity.ApprovalFlowInfoGranted">
+         SELECT
+            ag.id AS assetgroupId,
+            ag. NAME AS assetgroupName,
+            ag.pid AS assetgroupPid,
+            COUNT(distinct aag.asset_id) AS assetgroupRelationNumber,
+            table_a.*
+	    FROM
+	    (SELECT
+			g.assetgroup_id,
+			g.id AS grantedId,
+			u.guid AS userId,
+			u.username AS userUsername,
+			u. NAME AS userName,
+			GROUP_CONCAT(ug.id SEPARATOR ',') AS usergroupIds,
+			GROUP_CONCAT(ug. NAME SEPARATOR ',') AS usergroupNames
+		FROM t_granted g
+		LEFT JOIN t_user u ON u.guid = g.user_id
+		LEFT JOIN t_user_usergroup uug ON uug.user_guid = g.user_id
+		LEFT JOIN t_usergroup ug ON ug.id = uug.usergroup_id
+	    WHERE g.id = #{value} AND g.type = 1
+	     ) table_a
+        LEFT JOIN t_assetgroup ag ON ag.id = table_a.assetgroup_id
+        LEFT JOIN t_asset_assetgroup aag ON aag.assetgroup_id = table_a.assetgroup_id
+    </select>
+
+    <!-- 用户组： 授权设备账号  授权id 生成授权审批数据 -->
+    <select id="getApprovalFlowInfoGrantedByAssetAccountUsergroupId" parameterType="java.lang.Integer"
+            resultType="com.goldencis.osa.approval.entity.ApprovalFlowInfoGranted">
+     SELECT
+          table_a.*,
+          ag.id AS assetgroupId,
+          ag.name AS assetgroupName,
+          a.id AS assetId,
+          a.name AS assetName,
+          a.ip AS assetIp,
+          ac.id AS assetAccountId,
+          ac.username AS assetAccountName,
+          atp.name AS assettypeName,
+          atp.id AS assettypeId
+         FROM
+         (SELECT
+              g.asset_id ,
+              g.account_id,
+              g.id AS grantedId,
+              ug.id  AS usergroupIds,
+              ug.name  AS usergroupNames,
+              ug.pid AS usergroupPid,
+              COUNT(distinct uug.user_guid) AS usergroupRelationNumber
+              FROM  t_granted g
+              LEFT JOIN t_usergroup ug ON ug.id = g.usergroup_id
+              LEFT JOIN t_user_usergroup uug ON uug.usergroup_id = g.usergroup_id
+              WHERE g.id =#{value }  AND g.type = 3
+        ) AS table_a
+        LEFT JOIN t_asset a ON a.id = table_a.asset_id
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        LEFT JOIN t_asset_account ac ON ac.id = table_a.account_id
+        LEFT JOIN t_asset_type atp ON atp.id = a.type
+    </select>
+
+    <!--用户组：授权设备组 授权id 生成授权审批数据 -->
+    <select id="getApprovalFlowInfoGrantedByAssetgroupUsergroupId" parameterType="java.lang.Integer"
+            resultType="com.goldencis.osa.approval.entity.ApprovalFlowInfoGranted">
+        SELECT table_a.*,table_b.*
+	    FROM
+	    (SELECT
+          g.assetgroup_id ,
+          g.id AS grantedId,
+          ug.id  AS usergroupIds,
+          ug.name  AS usergroupNames,
+          ug.pid AS usergroupPid,
+           COUNT(DISTINCT uug.user_guid) AS usergroupRelationNumber
+          FROM  t_granted g
+          LEFT JOIN t_usergroup ug ON ug.id = g.usergroup_id
+          LEFT JOIN t_user_usergroup uug ON uug.usergroup_id = g.usergroup_id
+		 WHERE g.id =#{value } AND g.type = 1
+	    ) table_a ,
+	   (SELECT
+          ag.id AS assetgroupId,
+          ag.name AS assetgroupName,
+          ag.pid AS assetgroupPid,
+          COUNT(DISTINCT aag.asset_id) AS assetgroupRelationNumber
+          FROM t_granted g
+          LEFT JOIN t_assetgroup ag ON ag.id = g.assetgroup_id
+          LEFT JOIN t_asset_assetgroup aag ON aag.assetgroup_id = g.assetgroup_id
+		 WHERE g.id = #{value } AND g.type = 1) table_b
+    </select>
+
+    <select id="findGrantedListByUserIdAndStatus" parameterType="map" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>,
+        ag.name as assetgroupname,
+        a.name as assetname,
+        a.ip as assetip,
+        aa.username as accountname,
+        (CASE WHEN aa.trusteeship=1 THEN '托管' ELSE '未托管' END) as trusteeship
+        FROM
+        t_granted g
+        LEFT JOIN t_assetgroup ag ON ag.id=g.assetgroup_id
+        LEFT JOIN t_asset a ON a.id=g.asset_id
+        LEFT JOIN t_asset_account aa ON aa.id=g.account_id
+        WHERE
+        g.user_id = #{userId}
+        and g.`status`=#{status}
+    </select>
+
+    <select id="getGrantDetailCount" parameterType="map" resultType="java.lang.Integer">
+        SELECT
+          count(t.accountId)
+        FROM
+        (
+        SELECT
+        aa.id AS accountId,
+        (
+        CASE g.`status`
+        WHEN 1 THEN
+        '已授权'
+        WHEN - 1 THEN
+        '已拒绝'
+        ELSE
+        '待审批'
+        END
+        ) AS status,
+        a.`name` AS assetName,
+        a.ip AS assetIp,
+        aa.username AS account,
+        ag.`name` AS groupName,
+        '设备' AS grantFrom,
+        '用户' AS grantTo,
+        (
+        CASE aa.trusteeship
+        WHEN 1 THEN
+        '托管'
+        ELSE
+        '未托管'
+        END
+        ) AS trusteeship,
+        g.user_id AS userId
+        FROM
+        t_granted g
+        LEFT JOIN t_asset_account aa ON aa.id = g.account_id
+        LEFT JOIN t_asset a ON g.asset_id = a.id
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        <where>
+            g.type = 3
+            <if test="userGuid != null">
+                and g.user_id = #{userGuid}
+            </if>
+        </where>
+        UNION ALL
+        SELECT
+        aa.id AS accountId,
+        (
+        CASE g.`status`
+        WHEN 1 THEN
+        '已授权'
+        WHEN - 1 THEN
+        '已拒绝'
+        ELSE
+        '待审批'
+        END
+        ) AS status,
+        a.`name` AS assetName,
+        a.ip AS assetIp,
+        aa.username AS account,
+        ag.`name` AS groupName,
+        '设备组' AS grantFrom,
+        '用户' AS grantTo,
+        (
+        CASE aa.trusteeship
+        WHEN 1 THEN
+        '托管'
+        ELSE
+        '未托管'
+        END
+        ) AS trusteeship,
+        g.user_id AS userId
+        FROM
+        t_granted g
+        LEFT JOIN t_assetgroup ag ON ag.id = g.assetgroup_id
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = ag.id
+        LEFT JOIN t_asset a ON aag.asset_id = a.id
+        LEFT JOIN t_asset_account aa ON aa.asset_id = a.id
+        <where>
+            g.type = 1
+            AND aa.username IS NOT NULL
+            <if test="userGuid != null">
+                and g.user_id = #{userGuid}
+            </if>
+        </where>
+        UNION ALL
+        SELECT
+        aa.id AS accountId,
+        (
+        CASE g.`status`
+        WHEN 1 THEN
+        '已授权'
+        WHEN - 1 THEN
+        '已拒绝'
+        ELSE
+        '待审批'
+        END
+        ) AS status,
+        a.`name` AS assetName,
+        a.ip AS assetIp,
+        aa.username AS account,
+        ag.`name` AS groupName,
+        '设备' AS grantFrom,
+        '用户组' AS grantTo,
+        (
+        CASE aa.trusteeship
+        WHEN 1 THEN
+        '托管'
+        ELSE
+        '未托管'
+        END
+        ) AS trusteeship,
+        u.guid AS userId
+        FROM
+        t_granted g
+        LEFT JOIN t_asset_account aa ON aa.id = g.account_id
+        LEFT JOIN t_asset a ON g.asset_id = a.id
+        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+        LEFT JOIN t_user_usergroup uug ON uug.usergroup_id = g.usergroup_id
+        LEFT JOIN t_user u ON u.guid = uug.user_guid
+        <where>
+            g.usergroup_id IS NOT NULL
+            AND aa.id IS NOT NULL
+            <if test="userGuid != null">
+                and u.guid = #{userGuid}
+            </if>
+        </where>
+        UNION ALL
+        SELECT
+        aa.id AS accountId,
+        (
+        CASE g.`status`
+        WHEN 1 THEN
+        '已授权'
+        WHEN - 1 THEN
+        '已拒绝'
+        ELSE
+        '待审批'
+        END
+        ) AS status,
+        a.`name` AS assetName,
+        a.ip AS assetIp,
+        aa.username AS account,
+        ag.`name` AS groupName,
+        '设备组' AS grantFrom,
+        '用户组' AS grantTo,
+        (
+        CASE aa.trusteeship
+        WHEN 1 THEN
+        '托管'
+        ELSE
+        '未托管'
+        END
+        ) AS trusteeship,
+        u.guid AS userId
+        FROM
+        t_granted g
+        LEFT JOIN t_assetgroup ag ON ag.id = g.assetgroup_id
+        LEFT JOIN t_asset_assetgroup aag ON aag.assetgroup_id = ag.id
+        LEFT JOIN t_asset a ON aag.asset_id = a.id
+        LEFT JOIN t_asset_account aa ON aa.asset_id = a.id
+        LEFT JOIN t_user_usergroup uug ON uug.usergroup_id = g.usergroup_id
+        LEFT JOIN t_user u ON u.guid = uug.user_guid
+        <where>
+            g.usergroup_id IS NOT NULL
+            AND g.type = 1
+            AND aa.id IS NOT NULL
+            <if test="userGuid != null">
+                and u.guid = #{userGuid}
+            </if>
+        </where>
+        ) t
+        <if test="searchStr != null">
+            where t.status like CONCAT('%',#{searchStr},'%')
+            or t.assetName like CONCAT('%',#{searchStr},'%')
+            or t.assetIp like CONCAT('%',#{searchStr},'%')
+            or t.account like CONCAT('%',#{searchStr},'%')
+            or t.groupName like CONCAT('%',#{searchStr},'%')
+            or t.grantFrom like CONCAT('%',#{searchStr},'%')
+            or t.grantTo like CONCAT('%',#{searchStr},'%')
+            or t.trusteeship like CONCAT('%',#{searchStr},'%')
+        </if>
+    </select>
+
+    <select id="getGrantDetailInPage" parameterType="map" resultMap="grantDetailResultMap">
+        SELECT
+            *
+        FROM
+            (
+                SELECT
+                    aa.id AS accountId,
+                    (
+                        CASE g.`status`
+                        WHEN 1 THEN
+                            '已授权'
+                        WHEN - 1 THEN
+                            '已拒绝'
+                        ELSE
+                            '待审批'
+                        END
+                    ) AS status,
+                    a.`name` AS assetName,
+                    a.ip AS assetIp,
+                    aa.username AS account,
+                    atp.name as assetType,
+                    ag.`name` AS groupName,
+                    '设备' AS grantFrom,
+                    '用户' AS grantTo,
+                    (
+                        CASE aa.trusteeship
+                        WHEN 1 THEN
+                            '托管'
+                        ELSE
+                            '未托管'
+                        END
+                    ) AS trusteeship,
+                    g.user_id AS userId
+                FROM
+                    t_granted g
+                LEFT JOIN t_asset_account aa ON aa.id = g.account_id
+                LEFT JOIN t_asset a ON g.asset_id = a.id
+                left join t_asset_type atp on atp.id = a.type
+                LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+                LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+                <where>
+                    g.type = 3
+                    and g.`status` = 1
+                    <if test="userGuid != null">
+                      and g.user_id = #{userGuid}
+                    </if>
+                </where>
+                UNION ALL
+                    SELECT
+                        aa.id AS accountId,
+                        (
+                            CASE g.`status`
+                            WHEN 1 THEN
+                                '已授权'
+                            WHEN - 1 THEN
+                                '已拒绝'
+                            ELSE
+                                '待审批'
+                            END
+                        ) AS status,
+                        a.`name` AS assetName,
+                        a.ip AS assetIp,
+                        aa.username AS account,
+                        atp.name as assetType,
+                        ag.`name` AS groupName,
+                        '设备组' AS grantFrom,
+                        '用户' AS grantTo,
+                        (
+                            CASE aa.trusteeship
+                            WHEN 1 THEN
+                                '托管'
+                            ELSE
+                                '未托管'
+                            END
+                        ) AS trusteeship,
+                        g.user_id AS userId
+                    FROM
+                        t_granted g
+                    LEFT JOIN t_assetgroup ag ON ag.id = g.assetgroup_id
+                    LEFT JOIN t_asset_assetgroup aag ON aag.assetgroup_id = ag.id
+                    LEFT JOIN t_asset a ON aag.asset_id = a.id
+                    left join t_asset_type atp on atp.id = a.type
+                    LEFT JOIN t_asset_account aa ON aa.asset_id = a.id
+                    <where>
+                        g.type = 1
+                        and g.`status` = 1
+                        AND aa.username IS NOT NULL
+                        <if test="userGuid != null">
+                            and g.user_id = #{userGuid}
+                        </if>
+                    </where>
+                    UNION ALL
+                        SELECT
+                            aa.id AS accountId,
+                            (
+                                CASE g.`status`
+                                WHEN 1 THEN
+                                    '已授权'
+                                WHEN - 1 THEN
+                                    '已拒绝'
+                                ELSE
+                                    '待审批'
+                                END
+                            ) AS status,
+                            a.`name` AS assetName,
+                            a.ip AS assetIp,
+                            aa.username AS account,
+                            atp.name as assetType,
+                            ag.`name` AS groupName,
+                            '设备' AS grantFrom,
+                            '用户组' AS grantTo,
+                            (
+                                CASE aa.trusteeship
+                                WHEN 1 THEN
+                                    '托管'
+                                ELSE
+                                    '未托管'
+                                END
+                            ) AS trusteeship,
+                            u.guid AS userId
+                        FROM
+                            t_granted g
+                        LEFT JOIN t_asset_account aa ON aa.id = g.account_id
+                        LEFT JOIN t_asset a ON g.asset_id = a.id
+                        left join t_asset_type atp on atp.id = a.type
+                        LEFT JOIN t_asset_assetgroup aag ON aag.asset_id = a.id
+                        LEFT JOIN t_assetgroup ag ON ag.id = aag.assetgroup_id
+                        LEFT JOIN t_user_usergroup uug ON uug.usergroup_id = g.usergroup_id
+                        LEFT JOIN t_user u ON u.guid = uug.user_guid
+                        <where>
+                            g.usergroup_id IS NOT NULL
+                            AND aa.id IS NOT NULL
+                            and g.`status` = 1
+                            <if test="userGuid != null">
+                                and u.guid = #{userGuid}
+                            </if>
+                        </where>
+                        UNION ALL
+                            SELECT
+                                aa.id AS accountId,
+                                (
+                                    CASE g.`status`
+                                    WHEN 1 THEN
+                                        '已授权'
+                                    WHEN - 1 THEN
+                                        '已拒绝'
+                                    ELSE
+                                        '待审批'
+                                    END
+                                ) AS status,
+                                a.`name` AS assetName,
+                                a.ip AS assetIp,
+                                aa.username AS account,
+                                atp.name as assetType,
+                                ag.`name` AS groupName,
+                                '设备组' AS grantFrom,
+                                '用户组' AS grantTo,
+                                (
+                                    CASE aa.trusteeship
+                                    WHEN 1 THEN
+                                        '托管'
+                                    ELSE
+                                        '未托管'
+                                    END
+                                ) AS trusteeship,
+                                u.guid AS userId
+                            FROM
+                                t_granted g
+                            LEFT JOIN t_assetgroup ag ON ag.id = g.assetgroup_id
+                            LEFT JOIN t_asset_assetgroup aag ON aag.assetgroup_id = ag.id
+                            LEFT JOIN t_asset a ON aag.asset_id = a.id
+                            left join t_asset_type atp on atp.id = a.type
+                            LEFT JOIN t_asset_account aa ON aa.asset_id = a.id
+                            LEFT JOIN t_user_usergroup uug ON uug.usergroup_id = g.usergroup_id
+                            LEFT JOIN t_user u ON u.guid = uug.user_guid
+                            <where>
+                              g.usergroup_id IS NOT NULL
+                              AND g.type = 1
+                              and g.`status` = 1
+                              AND aa.id IS NOT NULL
+                                <if test="userGuid != null">
+                                    and u.guid = #{userGuid}
+                                </if>
+                            </where>
+            ) t
+        <if test="searchStr != null">
+            where t.status like CONCAT('%',#{searchStr},'%')
+            or t.assetName like CONCAT('%',#{searchStr},'%')
+            or t.assetIp like CONCAT('%',#{searchStr},'%')
+            or t.account like CONCAT('%',#{searchStr},'%')
+            or t.groupName like CONCAT('%',#{searchStr},'%')
+            or t.grantFrom like CONCAT('%',#{searchStr},'%')
+            or t.grantTo like CONCAT('%',#{searchStr},'%')
+            or t.trusteeship like CONCAT('%',#{searchStr},'%')
+        </if>
+        GROUP BY
+            t.accountId
+        <if test="start != null and length != null">
+            LIMIT #{start}, #{length}
+        </if>
+    </select>
+
+    <select id="getAssetIdsByOperator" resultType="java.lang.Integer">
+        SELECT uaa.asset_id
+        FROM t_user_asset_assetgroup uaa
+        WHERE uaa.user_guid = #{guid}
+          AND uaa.type = 1
+    </select>
+
+    <select id="getGroupIdsByOperator" resultType="java.lang.Integer">
+        SELECT uaa.assetgroup_id
+        FROM t_user_asset_assetgroup uaa
+        WHERE uaa.user_guid = #{guid}
+          AND uaa.type = 2
+    </select>
+</mapper>

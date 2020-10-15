@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <script src="/js/resource.js"></script> -->
+    <!-- <link rel="stylesheet" href="/css/table.css"> -->
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/taskList.css}" />
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+
+    <div class="gd-right-content" id="contentDiv">
+        <gd-tab>
+            <div class="container containerWrapper">      
+                <gd-tab-item label="自动改密">
+                    <form class="pitem" id="autoUpdatePwd" v-cloak>
+                        <div class="gd-padding-v-sm">
+                            <label class="pitem-label" style="float:left">执行资源</label>
+                            <div class="pitem-content ">
+                                <div class="gd-table-wrapper">
+                                    <gd-toolbar :config="resourceConfig"></gd-toolbar>
+                                    <div class="gd-table-scroll-h">
+                                        <div class="gd-table-head">
+                                            <table>
+                                                <tr>
+                                                    <th width="10%" align="center"><label class="gd-checkbox"><input type="checkbox" v-model="checkboxResource" @change="resourceAllChecked"><i></i></label></th>
+                                                    <th width="18%" align="left">类型</th>
+                                                    <th width="20%" align="left">设备名称</th>
+                                                    <th width="20%" align="left">设备IP</th>
+                                                    <th width="17%" align="left">设备组</th>
+                                                    <th width="15%" align="left">操作</th>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="gd-table-scroll-v">
+                                            <div class="gd-table-body">
+                                                <table id="resourceCheckTable">
+                                                    <tr v-for="(item,index) in assetListArr">
+                                                        <td width="10%"><label class="gd-checkbox"><input type="checkbox" :data-item="index" :data-id="item.id" :tab=index @change="resourceEveryChange"><i></i></label></td>
+                                                        <td width="18%"><img :src="getImgUrl(item.icon)" /></span></td>
+                                                        <td width="20%">{{item.name}}</td>
+                                                        <td width="20%">{{item.ip}}</td>
+                                                        <td width="17%">{{item.groupName}}</td>
+                                                        <td width="15%"><button type="button" class="gd-btn-alone icon-delete" @click="deleteAsset(index,item.id)"></button></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="gd-padding-v-sm">
+                            <label class="pitem-label label-padding-xs">执行时间</label>
+                            <div class="auto_backup_line_content set_input_stat">
+                                <div class="week_or_month">
+                                    <label class="gd-radio"  v-for="(item,index) in cycleOption">
+                                        <input type="radio" :value="item.value" name="week_or_month" @change="cycleClick(cycleInfo.cycle)" v-model="cycleInfo.cycle">
+                                        <i></i>
+                                        {{item.name}}
+                                    </label>
+                                </div>
+                                <div class="week_content" v-if="cycleInfo.cycle == 'week'">
+                                    <label class="gd-radio" v-for="(item,index) in weekCon">
+                                        <input type="radio" :value="item.value" name="weekValue" v-model="cycleInfo.weekDay">
+                                        <i></i>
+                                        {{item.name}}
+                                    </label>
+                                </div>
+                                <div class="month_content" v-if="cycleInfo.cycle == 'month'">
+                                    <input id="autoBackupMonthDayInput" type="text" placeholder="1-28" gd-validate="valueRange required" gdv-minvalue="1" gdv-maxvalue="28" class="gd-input gd-input-lg" v-model="cycleInfo.monthDay">
+                                    <span>日</span>
+                                </div>
+                                <div class="gd-margin-top-sm">
+                                    <gd-timepicker :config="timePointPickerConfig"></gd-timepicker>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="gd-padding-v-sm">
+                            <label class="pitem-label label-padding-xs">密码类型</label>
+                            <div class="auto_backup_line_content set_input_stat">
+                            <div class="week_or_month">
+                                <label class="gd-radio"  v-for="(item,index) in passwordTypeOption">
+                                    <input type="radio" :value="item.value"  name="passwordType" @change="pwtypeClick(passwordInfo.Type)" v-model="passwordInfo.type">
+                                    <i></i>
+                                    {{item.name}}
+
+                                    <input type="text" v-if="item.value == 'FIXED' " class="gd-input gd-margin-left-xs " gd-validate="requiredPwdRule" name="passwordFixed" v-model="passwordInfo.password">
+                                </label>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="gd-padding-v-sm"  v-if="passwordInfo.type == 'SAME' || passwordInfo.type == 'RANDOM' ">
+                            <label class="pitem-label">密码强度</label>
+                            <label class="gd-checkbox"><input type="checkbox" v-model="passwordInfo.number"><i></i>数字</label>
+                            <label class="gd-checkbox gd-margin-left-xxxl"><input type="checkbox" v-model="passwordInfo.capital"><i></i>大写字母</label>
+                            <label class="gd-checkbox gd-margin-left-xxxl"><input type="checkbox" v-model="passwordInfo.lowercase"><i></i>小写字母</label>
+                            <label class="gd-checkbox gd-margin-left-xxxl"><input type="checkbox" v-model="passwordInfo.special"><i></i>特殊符号</label>
+                        </div>
+
+                        <div class="gd-padding-v-sm"  v-if="passwordInfo.type == 'SAME' || passwordInfo.type == 'RANDOM' ">
+                            <label class="pitem-label label-padding-xs">密码长度</label>
+                            <div class="group-input"><input type="text" class="gd-input" gd-validate="int" v-model="passwordInfo.length"> <span>位</span></div>
+                        </div>
+
+                        <div class="gd-padding-v-sm">
+                            <label class="pitem-label">密码保存</label>
+                            <label class="gd-checkbox"><input type="checkbox" v-model="passwordSave.ftp"><i></i>FTP发送</label>
+                            <div class="ftp-send-con">
+                                <div class="row">
+                                    <label class="gd-label-required">FTP地址</label>
+                                    <div v-if="passwordSave.ftp">
+                                        <input type="text" class="gd-input" name="" placeholder="如:10.10.10.10:20" gd-validate="required" v-model="passwordSave.ftpAddr" >
+                                    </div>
+                                    <div v-else>
+                                        <input type="text" class="gd-input" name="" v-model="passwordSave.ftpAddr" >
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="gd-label-required">目标目录</label>
+                                    <div v-if="passwordSave.ftp">
+                                        <input type="text" class="gd-input" name="" gd-validate="required" v-model="passwordSave.ftpDir" >
+                                    </div>
+                                    <div v-else>
+                                        <input type="text" class="gd-input" name="" v-model="passwordSave.ftpDir" >
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="gd-label-required">用户名</label>
+                                    <div v-if="passwordSave.ftp">
+                                        <input type="text" class="gd-input" name="" gd-validate="required" v-model="passwordSave.ftpAccount" >
+                                    </div>
+                                    <div v-else>
+                                        <input type="text" class="gd-input" name="" gd-validate="" v-model="passwordSave.ftpAccount" >
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="gd-label-required">口令</label>
+                                    <div v-if="passwordSave.ftp">
+                                        <input type="passowrd" class="gd-input" name="" gd-validate="required" v-model="passwordSave.ftpPwd" >
+                                    </div>
+                                    <div v-else>
+                                        <input type="passowrd" class="gd-input" name="" v-model="passwordSave.ftpPwd" >
+                                    </div> 
+                                </div>
+                            </div>
+                            <div class="email-send-con">
+                                <label class="gd-checkbox"><input type="checkbox" v-model="passwordSave.email"><i></i>邮件发送</label>
+                                <div class="gd-margin-top-sm">
+                                    <gd-tag v-model="passwordSave.emailAddress" gd-validate="email" maxcount="5"></gd-tag>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="save-config-box"><button type="button" id="save_config" class="gd-btn" @click="saveConfig">保存</button></div>
+                </gd-tab-item>
+            </div>
+        </gd-tab>
+    </div>
+
+    <!-- 添加设备 -->
+    <script type="text/html" id="assetAddBox">
+        <div id="assetAdd" class="container">
+            <div class="nonSelect-asset">
+                <div class="asset-select-title">未选设备</div>
+                <gd-tree :config='treeAuthConfig'></gd-tree>
+            </div>
+            <div class="select-asset">
+                <div class="asset-select-title">已选设备({{assetAuthListLen}})</div>
+                <ul>
+                    <li v-for="item,index in assetList"><i class="icon icon-monitor"></i>{{item.assetGroupName}} _ {{item.assetName}}</li>
+                </ul>
+            </div>
+        </div>
+    </script>
+
+    <script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/taskList.js}"></script>
+
+</body>
+</html>

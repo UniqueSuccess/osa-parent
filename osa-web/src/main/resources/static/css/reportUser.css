@@ -1,0 +1,33 @@
+/*  */
+.echars-box .echars-common .pie-box {
+    width: 800px;
+    height: 100%;
+    margin: 0 auto;
+    position: relative;
+}
+
+#resource-pie {
+    height: 100%;
+    width: 100%;
+}
+
+
+.center-num {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1000;
+    color: #999;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    margin-left: 10px;
+}
+
+.center-num span {
+    font-size: 48px;
+    color: #fff;
+
+}
+.gd-hoverbox.gd-hoverbox-bottom {
+    padding: 10px 0 0 10px;
+}

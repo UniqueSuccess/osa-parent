@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <script src="/js/resource.js"></script> -->
+    <!-- <link rel="stylesheet" href="/css/table.css"> -->
+    <link rel="stylesheet" th:href="@{/gdui/css/gdui.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/validate.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <link rel="stylesheet" th:href="@{/css/user.css}" />
+    <!-- <link rel="stylesheet" th:href="@{/css/gd_common.css}" /> -->
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body>
+    <!-- 此处是整体框架用，包括侧边栏和顶部 -->
+    <div th:replace="common/topLeft :: topleftbar"></div>
+
+    <div class="gd-right-content" id="contentDiv">
+        <div class="userlistBox">
+            <gd-toolbar :config="toolbarConfig"></gd-toolbar>
+            <div class="table-box">
+                <gd-table :config="tableConfig"></gd-table>
+            </div>
+        </div>
+
+        <div id="addAssetGroupBox" style="display:none">
+            <form class="container" id="assetFrom">
+                <div class="row">
+                    <label class="gd-label-required">名称</label>
+                    <input type="text" class="gd-input" name="name" gd-validate="exceptSpecialChar1 required maxLength" gdv-maxlength="30" v-model="groupName">
+                </div>
+                <div class="row">
+                    <label class="gd-label-required">所属组</label>
+                    <gd-select placeholder="请选择" name="pid" v-model="groupBelong" gd-validate="groupBelongRule" ref="groupTreeSeletct">
+                        <gd-tree :config='treeWinConfig' class="gd-tree-gray"></gd-tree>
+                    </gd-select>
+                </div>
+                <div class="row">
+                    <label>备注</label>
+                    <textarea type="text" class="gd-textarea" v-model="remark" name="remark" gd-validate="maxLength" gdv-maxlength="200" style="width:280px"></textarea>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:src="@{/js/vue.min.js}"></script>
+    <script th:src="@{/gdui/js/gdui.min.js}"></script>
+    <script th:src="@{/js/global.js}"></script>
+    <script th:src="@{/js/assetgroup.js}"></script>
+
+</body>
+</html>

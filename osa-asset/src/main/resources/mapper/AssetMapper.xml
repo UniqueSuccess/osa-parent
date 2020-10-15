@@ -1,0 +1,687 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.asset.mapper.AssetMapper">
+
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.asset.entity.Asset">
+        <id column="id" property="id" />
+        <result column="type" property="type" />
+        <result column="name" property="name" />
+        <result column="ip" property="ip" />
+        <result column="encode" property="encode" />
+        <result column="remark" property="remark" />
+        <result column="account" property="account" />
+        <result column="password" property="password" />
+        <result column="is_publish" property="isPublish" />
+        <result column="create_time" property="createTime" />
+        <result column="create_by" property="createBy" />
+        <result column="update_time" property="updateTime" />
+        <result column="update_by" property="updateBy" />
+    </resultMap>
+
+    <resultMap id="BaseResultMapWithAssetAccount" type="com.goldencis.osa.asset.entity.Asset">
+        <id column="id" property="id" />
+        <result column="type" property="type" />
+        <result column="name" property="name" />
+        <result column="ip" property="ip" />
+        <result column="encode" property="encode" />
+        <result column="remark" property="remark" />
+        <result column="account" property="account" />
+        <result column="password" property="password" />
+        <result column="is_publish" property="isPublish" />
+        <result column="create_time" property="createTime" />
+        <result column="create_by" property="createBy" />
+        <result column="update_time" property="updateTime" />
+        <result column="update_by" property="updateBy" />
+        <collection property="accounts" ofType="com.goldencis.osa.asset.entity.AssetAccount">
+            <result column="account_id" property="id"/>
+            <result column="asset_id" property="assetId"/>
+            <result column="account_username" property="username"/>
+            <result column="account_password" property="password"/>
+            <result column="trusteeship" property="trusteeship" />
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, type, name, ip, encode, remark, account, password, is_publish, create_time, create_by, update_time, update_by
+    </sql>
+
+    <select id="countAssetsInPage" parameterType="map" resultType="java.lang.Integer">
+        select count(distinct(t.id)) from (
+        select
+        a.id as id,
+        aag.assetgroup_id as groupId
+        from t_asset a
+        left join t_asset_assetgroup aag on aag.asset_id=a.id
+        <where>
+                <if test="searchStr != null and searchStr != ''">
+                    and (a.name like #{searchStr} or a.ip like #{searchStr})
+                </if>
+                <if test="groupIdList != null">
+                    and aag.assetgroup_id in
+                    <foreach collection="groupIdList" open="(" close=")" separator="," item="item">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="assetTypeList != null">
+                    and a.type in
+                    <foreach collection="assetTypeList" open="(" close=")" separator="," item="item">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="assetIdList != null">
+                    and a.id in
+                    <foreach collection="assetIdList" open="(" close=")" separator="," item="item">
+                        #{item}
+                    </foreach>
+                </if>
+            </where>
+        ) as t
+        <where>
+            <if test="permissionAssetIdList != null">
+                <if test="permissionAssetIdList.size() != 0">
+                    t.id in
+                    <foreach collection="permissionAssetIdList" open="(" close=")" separator="," item="item">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="permissionAssetIdList.size() == 0">
+                    t.id=-1
+                </if>
+            </if>
+            <if test="permissionGroupIdList != null">
+                <if test="permissionGroupIdList.size() != 0">
+                    or t.groupId in
+                    <foreach collection="permissionGroupIdList" open="(" close=")" separator="," item="item">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="permissionGroupIdList.size() == 0">
+                    or t.groupId=-1
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <select id="getAssetsInPage" parameterType="map" resultType="com.goldencis.osa.asset.entity.Asset">
+        select * from (
+            select distinct
+            a.*,
+            atp.name as typeName,
+            atp.icon as icon,
+            d.name as encodeName,
+            ag.id as groupId,
+            ag.name as groupName
+            from t_asset a
+            left join t_asset_type atp on atp.id=a.type
+            left join t_dictionary d on d.type='SBBM' and d.value=a.encode
+            left join t_asset_assetgroup aag on aag.asset_id=a.id
+            left join t_assetgroup ag on ag.id=aag.assetgroup_id
+            <where>
+                <if test="searchStr != null and searchStr != ''">
+                    and (a.name like #{searchStr} or a.ip like #{searchStr})
+                </if>
+                <if test="groupIdList != null">
+                    and aag.assetgroup_id in
+                    <foreach collection="groupIdList" open="(" close=")" separator="," item="item">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="assetTypeList != null">
+                    and a.type in
+                    <foreach collection="assetTypeList" open="(" close=")" separator="," item="item">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="assetIdList != null">
+                    and a.id in
+                    <foreach collection="assetIdList" open="(" close=")" separator="," item="item">
+                        #{item}
+                    </foreach>
+                </if>
+            </where>
+        ) as t
+        <where>
+            <if test="permissionAssetIdList != null">
+                <if test="permissionAssetIdList.size() != 0">
+                    t.id in
+                    <foreach collection="permissionAssetIdList" open="(" close=")" separator="," item="item">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="permissionAssetIdList.size() == 0">
+                    t.id=-1
+                </if>
+            </if>
+            <if test="permissionGroupIdList != null">
+                <if test="permissionGroupIdList.size() != 0">
+                    or t.groupId in
+                    <foreach collection="permissionGroupIdList" open="(" close=")" separator="," item="item">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="permissionGroupIdList.size() == 0">
+                    or t.groupId=-1
+                </if>
+            </if>
+        </where>
+        <if test="orderColumn != null and orderColumn != '' and orderType != null and orderType != ''">
+          ORDER BY #{orderColumn} #{orderType}
+        </if>
+        <if test="start != null and length != null">
+          limit #{start} , #{length}
+        </if>
+    </select>
+
+    <select id="getAssetDetailById" parameterType="java.lang.Integer" resultType="com.goldencis.osa.asset.entity.Asset">
+        select
+        a.*,
+        ag.id as groupId,
+        ag.name as groupName,
+        atp.name as typeName,
+        atp.icon as icon
+        from t_asset a
+        left join t_asset_assetgroup aag on aag.asset_id=a.id
+        left join t_assetgroup ag on ag.id=aag.assetgroup_id
+        left join t_asset_type atp on atp.id=a.type
+        where a.id=#{id}
+    </select>
+
+    <select id="listWithAssetAccount" resultMap="BaseResultMapWithAssetAccount">
+        SELECT
+        a.id, type, name, ip, encode, remark
+        ,
+        aa.id AS account_id, aa.username AS account_username, aa.password AS account_password, trusteeship
+        FROM t_asset a
+        LEFT JOIN t_asset_account aa ON a.id = aa.asset_id
+        <where>
+            <if test="assetIds != null and assetIds.size() > 0">
+                a.id IN
+                <foreach collection="assetIds" item="assetId" open="(" separator="," close=")">
+                    #{assetId}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getPublishList" resultMap="BaseResultMap">
+        select
+        a.*
+        from t_asset a
+        left join t_asset_type atp on a.type=atp.id
+        where (atp.id=2 or atp.pid=2) and a.is_publish=1
+    </select>
+
+    <insert id="insertAndGetPrimaryKey" parameterType="com.goldencis.osa.asset.entity.Asset" useGeneratedKeys="true" keyProperty="id">
+        insert into t_asset value
+        (#{id}, #{type}, #{name}, #{ip}, #{encode}, #{remark}, #{account}, #{password}, #{isPublish}, #{createTime}, #{createBy}, #{updateTime}, #{updateBy})
+    </insert>
+
+    <select id="getResourceReportChart" parameterType="map" resultType="java.util.Map">
+        SELECT COUNT(*) AS num,b.name AS typeName FROM `t_asset` a, t_asset_type b WHERE a.type = b.id AND a.id IN (
+
+        SELECT DISTINCT(asset_id) FROM `t_granted` WHERE asset_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        UNION SELECT asset_id FROM `t_asset_assetgroup` WHERE assetgroup_id IN (SELECT DISTINCT(assetgroup_id) FROM `t_granted` WHERE assetgroup_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        )
+        ) GROUP BY TYPE
+    </select>
+
+    <select id="getResourceReportCount" parameterType="map" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM (
+        SELECT
+        a.*
+        FROM
+        (SELECT
+        g.id AS account_id,
+        d.guid,
+        a.create_time,
+        b.`id` asset_id,
+        c.name typename,
+        b.name assetname,
+        b.ip,
+        g.username account,
+        d.`username`,
+        d.`name` truename,
+        GROUP_CONCAT(DISTINCT(f.`name`)) groupname
+        FROM
+        (SELECT
+        create_time, asset_id, user_id, account_id
+        FROM
+        `t_granted`
+        WHERE account_id IS NOT NULL
+        AND user_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY account_id,
+        user_id) a
+        LEFT JOIN `t_asset` b
+        ON a.asset_id = b.`id`
+        LEFT JOIN t_asset_type c
+        ON b.type = c.id
+        LEFT JOIN t_user d
+        ON a.user_id = d.guid
+        LEFT JOIN `t_user_usergroup` e
+        ON d.`guid` = e.`user_guid`
+        LEFT JOIN `t_usergroup` f
+        ON e.`usergroup_id` = f.`id`
+        LEFT JOIN `t_asset_account` g
+        ON a.account_id = g.id
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND c.id IN (${params.assetType})
+        </if>
+        GROUP BY g.id, d.guid
+        UNION
+        SELECT
+        c.id AS account_id,
+        f.guid,
+        a.create_time,
+        b.`asset_id`,
+        e.name typename,
+        d.name assetname,
+        d.ip,
+        c.username account,
+        f.`username`,
+        f.`name` truename,
+        GROUP_CONCAT(DISTINCT(h.`name`)) groupname
+        FROM
+        (SELECT
+        create_time, user_id, assetgroup_id
+        FROM
+        `t_granted`
+        WHERE assetgroup_id IS NOT NULL
+        AND user_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY assetgroup_id,
+        user_id) a
+        LEFT JOIN `t_asset_assetgroup` b
+        ON a.`assetgroup_id` = b.`assetgroup_id`
+        LEFT JOIN `t_asset_account` c
+        ON c.`asset_id` = b.`asset_id`
+        LEFT JOIN `t_asset` d
+        ON d.id = b.`asset_id`
+        LEFT JOIN t_asset_type e
+        ON d.type = e.id
+        LEFT JOIN `t_user` f
+        ON f.`guid` = a.user_id
+        LEFT JOIN `t_user_usergroup` g
+        ON g.`user_guid` = a.user_id
+        LEFT JOIN `t_usergroup` h
+        ON h.`id` = g.`usergroup_id`
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND e.id IN (${params.assetType})
+        </if>
+        GROUP BY c.`id`, f.guid
+        UNION
+        SELECT
+        f.id AS account_id,
+        c.guid,
+        a.create_time,
+        a.asset_id,
+        e.name typename,
+        d.name assetname,
+        d.ip,
+        f.`username` account,
+        c.`username`,
+        c.`name` truename,
+        GROUP_CONCAT(DISTINCT (h.`name`)) groupname
+        FROM
+        (SELECT
+        create_time, asset_id, user_id, account_id, usergroup_id
+        FROM
+        `t_granted`
+        WHERE account_id IS NOT NULL
+        AND usergroup_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY account_id,
+        usergroup_id) a
+        LEFT JOIN `t_user_usergroup` b
+        ON a.usergroup_id = b.`usergroup_id`
+        LEFT JOIN `t_user` c
+        ON c.`guid` = b.`user_guid`
+        LEFT JOIN `t_asset` d
+        ON d.`id` = a.asset_id
+        LEFT JOIN `t_asset_type` e
+        ON e.`id` = d.`type`
+        LEFT JOIN `t_asset_account` f
+        ON f.`id` = a.account_id
+        LEFT JOIN `t_user_usergroup` g
+        ON g.`user_guid` = c.guid
+        LEFT JOIN `t_usergroup` h
+        ON h.`id` = g.`usergroup_id`
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND e.id IN (${params.assetType})
+        </if>
+        GROUP BY f.`id`, c.guid
+        UNION
+        SELECT
+        d.id AS account_id,
+        f.guid,
+        a.create_time,
+        b.`asset_id`,
+        d.`username` account,
+        c.`name` assetname,
+        c.`ip`,
+        f.`username`,
+        g.`name` typename,
+        f.`name` truename,
+        GROUP_CONCAT(DISTINCT (h.`name`)) groupname
+        FROM
+        (SELECT
+        create_time, assetgroup_id, usergroup_id
+        FROM
+        `t_granted`
+        WHERE assetgroup_id IS NOT NULL
+        AND usergroup_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+        GROUP BY assetgroup_id,
+        usergroup_id) a
+        LEFT JOIN `t_asset_assetgroup` b
+        ON b.`assetgroup_id` = a.assetgroup_id
+        LEFT JOIN `t_asset` c
+        ON c.`id` = b.`asset_id`
+        LEFT JOIN `t_asset_account` d
+        ON d.`asset_id` = b.`asset_id`
+        LEFT JOIN `t_user_usergroup` e
+        ON e.`usergroup_id` = a.usergroup_id
+        LEFT JOIN `t_user` f
+        ON f.`guid` = e.`user_guid`
+        LEFT JOIN `t_asset_type` g
+        ON g.`id` = c.`type`
+        LEFT JOIN `t_usergroup` h
+        ON h.`id` = e.`usergroup_id`
+        WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND g.id IN (${params.assetType})
+        </if>
+        GROUP BY d.id,f.guid) a
+        WHERE 1=1 AND a.guid IS NOT NULL AND a.asset_id IS NOT NULL
+        <if test="params.searchStr != null and params.searchStr != ''">
+            AND concat(a.account, a.assetname, a.ip, a.username, a.typename, a.truename, a.typename, a.groupname) like concat('%',#{params.searchStr},'%')
+        </if>
+        GROUP BY a.account_id, a.guid) b
+    </select>
+
+
+    <select id="getResourceReportList" parameterType="map" resultType="com.goldencis.osa.asset.entity.ResourceEntity">
+        SELECT
+          a.*
+        FROM
+          (SELECT
+            g.id AS account_id,
+            d.guid,
+            a.create_time,
+            b.`id` asset_id,
+            c.name typename,
+            b.name assetname,
+            b.ip,
+            g.username account,
+            d.`username`,
+            d.`name` truename,
+            GROUP_CONCAT(DISTINCT(f.`name`)) groupname
+          FROM
+            (SELECT
+              create_time, asset_id, user_id, account_id
+            FROM
+              `t_granted`
+            WHERE account_id IS NOT NULL
+              AND user_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+            GROUP BY account_id,
+              user_id) a
+            LEFT JOIN `t_asset` b
+              ON a.asset_id = b.`id`
+            LEFT JOIN t_asset_type c
+              ON b.type = c.id
+            LEFT JOIN t_user d
+              ON a.user_id = d.guid
+            LEFT JOIN `t_user_usergroup` e
+              ON d.`guid` = e.`user_guid`
+            LEFT JOIN `t_usergroup` f
+              ON e.`usergroup_id` = f.`id`
+            LEFT JOIN `t_asset_account` g
+              ON a.account_id = g.id
+            WHERE 1=1
+            <if test="params.assetType != null and params.assetType != ''">
+                AND c.id IN (${params.assetType})
+            </if>
+            GROUP BY g.id, d.guid
+        UNION
+          SELECT
+            c.id AS account_id,
+            f.guid,
+            a.create_time,
+            b.`asset_id`,
+            e.name typename,
+            d.name assetname,
+            d.ip,
+            c.username account,
+            f.`username`,
+            f.`name` truename,
+            GROUP_CONCAT(DISTINCT(h.`name`)) groupname
+          FROM
+            (SELECT
+              create_time, user_id, assetgroup_id
+            FROM
+              `t_granted`
+            WHERE assetgroup_id IS NOT NULL
+              AND user_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+            GROUP BY assetgroup_id,
+              user_id) a
+            LEFT JOIN `t_asset_assetgroup` b
+              ON a.`assetgroup_id` = b.`assetgroup_id`
+            LEFT JOIN `t_asset_account` c
+              ON c.`asset_id` = b.`asset_id`
+            LEFT JOIN `t_asset` d
+              ON d.id = b.`asset_id`
+            LEFT JOIN t_asset_type e
+              ON d.type = e.id
+            LEFT JOIN `t_user` f
+              ON f.`guid` = a.user_id
+            LEFT JOIN `t_user_usergroup` g
+              ON g.`user_guid` = a.user_id
+            LEFT JOIN `t_usergroup` h
+              ON h.`id` = g.`usergroup_id`
+            WHERE 1=1
+            <if test="params.assetType != null and params.assetType != ''">
+                AND e.id IN (${params.assetType})
+            </if>
+            GROUP BY c.`id`, f.guid
+          UNION
+          SELECT
+            f.id AS account_id,
+            c.guid,
+            a.create_time,
+            a.asset_id,
+            e.name typename,
+            d.name assetname,
+            d.ip,
+            f.`username` account,
+            c.`username`,
+            c.`name` truename,
+            GROUP_CONCAT(DISTINCT (h.`name`)) groupname
+          FROM
+            (SELECT
+              create_time, asset_id, user_id, account_id, usergroup_id
+            FROM
+              `t_granted`
+            WHERE account_id IS NOT NULL
+              AND usergroup_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+            GROUP BY account_id,
+              usergroup_id) a
+            LEFT JOIN `t_user_usergroup` b
+              ON a.usergroup_id = b.`usergroup_id`
+            LEFT JOIN `t_user` c
+              ON c.`guid` = b.`user_guid`
+            LEFT JOIN `t_asset` d
+              ON d.`id` = a.asset_id
+            LEFT JOIN `t_asset_type` e
+              ON e.`id` = d.`type`
+            LEFT JOIN `t_asset_account` f
+              ON f.`id` = a.account_id
+            LEFT JOIN `t_user_usergroup` g
+              ON g.`user_guid` = c.guid
+            LEFT JOIN `t_usergroup` h
+              ON h.`id` = g.`usergroup_id`
+            WHERE 1=1
+            <if test="params.assetType != null and params.assetType != ''">
+                AND e.id IN (${params.assetType})
+            </if>
+            GROUP BY f.`id`, c.guid
+          UNION
+          SELECT
+            d.id AS account_id,
+            f.guid,
+            a.create_time,
+            b.`asset_id`,
+            d.`username` account,
+            c.`name` assetname,
+            c.`ip`,
+            f.`username`,
+            g.`name` typename,
+            f.`name` truename,
+            GROUP_CONCAT(DISTINCT (h.`name`)) groupname
+        FROM
+            (SELECT
+              create_time, assetgroup_id, usergroup_id
+            FROM
+              `t_granted`
+            WHERE assetgroup_id IS NOT NULL
+              AND usergroup_id IS NOT NULL
+        <if test="params.startTime != null and params.startTime != '' and params.endTime != null and params.endTime != ''">
+            and create_time &gt;= #{params.startTime} and create_time &lt; #{params.endTime}
+        </if>
+            GROUP BY assetgroup_id,
+              usergroup_id) a
+            LEFT JOIN `t_asset_assetgroup` b
+              ON b.`assetgroup_id` = a.assetgroup_id
+            LEFT JOIN `t_asset` c
+              ON c.`id` = b.`asset_id`
+            LEFT JOIN `t_asset_account` d
+              ON d.`asset_id` = b.`asset_id`
+            LEFT JOIN `t_user_usergroup` e
+              ON e.`usergroup_id` = a.usergroup_id
+            LEFT JOIN `t_user` f
+              ON f.`guid` = e.`user_guid`
+            LEFT JOIN `t_asset_type` g
+              ON g.`id` = c.`type`
+            LEFT JOIN `t_usergroup` h
+              ON h.`id` = e.`usergroup_id`
+            WHERE 1=1
+        <if test="params.assetType != null and params.assetType != ''">
+            AND g.id IN (${params.assetType})
+        </if>
+        GROUP BY d.id,f.guid) a
+        WHERE 1=1 AND a.guid IS NOT NULL AND a.asset_id IS NOT NULL
+        <if test="params.searchStr != null and params.searchStr != ''">
+            AND concat(a.account, a.assetname, a.ip, a.username, a.typename, a.truename, a.typename, a.groupname) like concat('%',#{params.searchStr},'%')
+        </if>
+        GROUP BY a.account_id, a.guid
+        order by ${params.orderColumn} ${params.orderType}
+        limit ${params.start}, ${params.length}
+    </select>
+
+    <!-- 获取所有设备（不包含应用程序发布器） 变更为 允许应用程序发布器   WHERE (a.is_publish != 1 OR a.is_publish IS NULL) -->
+    <select id="listAssetsNotPublis" resultMap="BaseResultMap">
+        SELECT
+        a.id, type, name, ip, encode, remark
+        FROM t_asset a
+    </select>
+
+    <!-- 通过 操作员guid 设置的设备权限 -->
+    <select id="findAssetIdsByUserGuid" resultType="java.lang.Integer">
+        SELECT
+        <if test="operatorTypeAsset != null and operatorTypeAsset == 1 " >
+            asset_id
+        </if>
+        <if test="operatorTypeAsset != null and operatorTypeAsset == 2 " >
+            assetgroup_id
+        </if>
+        FROM t_user_asset_assetgroup
+        <where>
+            <if test="operatorTypeAsset != null " >
+             and  type = #{operatorTypeAsset}
+            </if>
+            <if test="userGuid != null " >
+                and  user_guid = #{userGuid}
+            </if>
+        </where>
+    </select>
+    <select id="getAssetIdListByUserPermission" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select asset_id from t_user_asset_assetgroup where user_guid = #{userId} and type = 1
+    </select>
+    <select id="getAssetGroupIdListByUserPermission" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select assetgroup_id from t_user_asset_assetgroup where user_guid = #{userId} and type = 2
+    </select>
+
+    <insert id="insertUserAssetPermission">
+        INSERT into t_user_asset_assetgroup (user_guid, type, asset_id, assetgroup_id) VALUES (#{guid}, 1, #{id}, null);
+    </insert>
+
+    <select id="infoForHomePage" resultType="com.goldencis.osa.asset.domain.AssetCount">
+        SELECT
+            count(a.id) as count,
+            atp.`name` AS typeName
+        FROM
+            t_asset a
+        LEFT JOIN t_asset_type atp ON atp.id = a.type
+        GROUP BY
+            type
+        ORDER BY count desc
+    </select>
+
+    <!-- 根据每天获取设备数据 -->
+    <select id="getHomeAssetsByDay" parameterType="java.lang.String" resultType="com.goldencis.osa.asset.entity.HomeAssets">
+         SELECT
+              COUNT(1) AS assetNums,
+              t.type AS assetType,
+              asset_id AS assetId,
+              asset_name AS assetName,
+              asset_ip AS assetIp
+         FROM
+          t_log_system s LEFT JOIN t_asset t ON t.id = s.asset_id
+         WHERE s.log_type = 16 AND DATE(TIME) = #{value}
+         GROUP BY asset_id
+    </select>
+
+    <select id="getUserAssetAssetgroup" resultType="java.util.Map">
+        select * from t_user_asset_assetgroup where user_guid != '3' or type != 2 or assetgroup_id != 1;
+    </select>
+
+    <delete id="deleteUserAssetAssetgroup">
+        TRUNCATE TABLE t_user_asset_assetgroup;
+        INSERT INTO `t_user_asset_assetgroup` (`user_guid`, `type`, `asset_id`, `assetgroup_id`) VALUES ('3', '2', NULL, '1');
+    </delete>
+
+    <insert id="saveUserAssetAssetgroup">
+        INSERT INTO `t_user_asset_assetgroup` (`user_guid`, `type`, `asset_id`, `assetgroup_id`)
+        VALUES
+        <foreach collection="list" separator="," open="" close="" item="item" index="index">
+            (#{item.user_guid}, #{item.type}, #{item.asset_id}, #{item.assetgroup_id})
+        </foreach>
+        ;
+    </insert>
+
+</mapper>

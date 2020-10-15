@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goldencis.osa.strategy.mapper.StrategyMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.goldencis.osa.strategy.entity.Strategy">
+        <id column="guid" property="guid" />
+        <result column="name" property="name" />
+        <result column="session_type" property="sessionType" />
+        <result column="rdp" property="rdp" />
+        <result column="ssh" property="ssh" />
+        <result column="screen_watermark" property="screenWatermark" />
+        <result column="file_mon" property="fileMon" />
+        <result column="create_time" property="createTime" />
+        <result column="create_by" property="createBy" />
+        <result column="update_time" property="updateTime" />
+        <result column="updtae_by" property="updtaeBy" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        s.guid,  s.name,  s.session_type,  s.rdp,  s.ssh, s.screen_watermark, s.file_mon,  s.create_time,  s.create_by,  s.update_time,  s.updtae_by
+    </sql>
+
+    <!-- 通过guid查询 策略信息 -->
+    <select id="findStrategyByGuid" parameterType="String" resultType="com.goldencis.osa.strategy.entity.Strategy">
+        select <include refid="Base_Column_List"></include>
+        from t_strategy s
+        where s.guid = #{value}
+    </select>
+
+    <!-- 根据查询条件获取总数 -->
+    <select id="countStrategyInPage" parameterType="map" resultType="Integer">
+        SELECT COUNT(1) FROM t_strategy s
+        <where>
+            <if test="searchStr !=null">
+                AND s.name like #{searchStr}
+            </if>
+            <if test="startTime != null">
+                AND s.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND s.create_time &lt; #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 分页获取数据 -->
+    <select id="getStrategyInPage" parameterType="map" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"></include>
+        FROM t_strategy s
+       <where>
+            <if test="searchStr !=null">
+                AND s.name like #{searchStr}
+            </if>
+            <if test="startTime != null">
+                AND s.create_time &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND s.create_time &lt; #{endTime}
+            </if>
+       </where>
+        <if test="orderType == 'desc'">
+            ORDER BY s.create_time DESC
+        </if>
+        <if test="orderType == 'asc'">
+            ORDER BY s.create_time ASC
+        </if>
+        limit #{start} , #{length}
+    </select>
+
+</mapper>
